@@ -5,11 +5,11 @@ library(quantmod)
 
 
 dT <- function(d) {return(as.Date(d,'%d-%b-%y'))}
-longDate <- function(d) {return(as.Date(as.character(d),'%A, %B %d, %Y'))}
+longDate <- function(d) {return(as.Date(as.character(d),'%b %d, %Y'))}
 
 #' Data convertor from finantial time
 toXTS <- function(data){
-    d <- cbind(as.Date(apply(data[1],2,longDate)),data[2:5])
+    d <- cbind(as.Date(apply(data[1],2,longDate)),data[2])
     return(xts(d[,-1], order.by=d[,1]))
     }
 
@@ -25,8 +25,15 @@ plot(y[[1]],y[[2]],'l')
 source('~/Desktop/flipsideR-master/R/option-chain.R')
 source('~/Desktop/flipsideR-master/R/configure.R')
 ########################################################
-ck92 <- read.csv('~/Desktop/b886ck92.csv')
-ck <- toXTS(ck92)
-chartSeries(ck)
-addSMA()
-weeklyReturns(ck)
+stat <- function(data='~/Desktop/b886ck92.csv',series='S'){
+# '~/Desktop/b8qypr36.csv
+    ck92 <- read.csv(data)
+    ck <- toXTS(ck92)
+    if (series=='S'){
+        chartSeries(ck)
+        addEMA()
+        #addMACD()
+        }
+    else if (series=='w') barplot(weeklyReturn(ck))
+    else if (series=='m') barplot(monthlyReturn(ck))
+}
