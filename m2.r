@@ -1,6 +1,6 @@
 library(quantmod)
 
-lst <- c('WIZZ.L','KAZ.L','VED.L','ICP.L','RIO.L','STAN.L','JUP.L')
+lst <- c('WIZZ.L','KAZ.L','VED.L','ICP.L','RIO.L','STAN.L','JUP.L','IHG.L')
 
 for (n in lst) {
     obj <- getSymbols(n,src='google',env=NULL)
