@@ -1,6 +1,6 @@
 library(quantmod)
 
-lst <- c('WIZZ.L','KAZ.L','VED.L','ICP.L','RIO.L','STAN.L','JUP.L','IHG.L',
+lst <- c('WIZZ.L','KAZ.L','VED.L','RIO.L','STAN.L','JUP.L',
          'AMD','NVDA','GOOG','TSLA','AAPL','FB')
 
 for (n in lst) {
@@ -15,6 +15,7 @@ for (n in lst) {
     #print(q)
                                         #obj <- merge(obj,q,by="Date")
     obj <- rbind(obj,q)
+    obj <- obj[ ! duplicated( index(obj), fromLast = TRUE ),  ]
     print(tail(obj))
     # Chart
     chartSeries(obj,subset='last 9 months',TA=c(addSMA(),addEMA(30),addMACD(),addSMA(200),addVo()),multi.col=FALSE,name=n)
