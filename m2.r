@@ -16,8 +16,8 @@ for (n in lst) {
     obj <- rbind(obj,q)
     print(tail(obj))
     # Chart
-    chartSeries(obj,subset='last 4 months',TA=c(addSMA(),addEMA(30),addMACD(),addSMA(200),addVo()),multi.col=FALSE,name=n)
-    invisible(readline(prompt="Press [enter] to continue"))
     chartSeries(obj,subset='last 9 months',TA=c(addSMA(),addEMA(30),addMACD(),addSMA(200),addVo()),multi.col=FALSE,name=n)
+    invisible(readline(prompt="Press [enter] to continue"))
+    chartSeries(obj,subset='last 4 months',TA=c(addSMA(),addEMA(30),addMACD(),addSMA(200),addVo()),multi.col=FALSE,name=n)
     invisible(readline(prompt="Press [enter] to continue"))
     }
