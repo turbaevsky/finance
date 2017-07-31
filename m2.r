@@ -1,6 +1,6 @@
 library(quantmod)
 
-lst <- c('WIZZ.L','KAZ.L','RIO.L','STAN.L','JUP.L','FEVR.L')
+lst <- c('ECM.L','HSBA.L','WIZZ.L','KAZ.L','RIO.L','STAN.L','JUP.L','FEVR.L')
 alst <- c('AMD','NVDA','GOOG','TSLA','AAPL','FB')
 
 lst <- c(lst)
