@@ -20,6 +20,7 @@ for (n in lst) {
     obj <- obj[ ! duplicated( index(obj), fromLast = TRUE ),  ]
     print(tail(obj))
     # Chart
+    # MACD could be (5,34,5) to see Elliot's wave
     chartSeries(obj,subset='last 9 months',TA=c(addSMA(),addEMA(30),addMACD(),addSMA(200),addVo()),multi.col=FALSE,name=n)
     invisible(readline(prompt="Press [enter] to continue"))
     chartSeries(obj,subset='last 4 months',TA=c(addSMA(),addEMA(30),addMACD(),addSMA(200),addVo(),addATR(20)),multi.col=FALSE,name=n)
