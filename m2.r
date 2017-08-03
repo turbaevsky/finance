@@ -7,20 +7,24 @@ extlst <- c('III.L','ARM.L','ASC.L','ABC.L','ADM.L','AGK.L','ATST.L','AML.L','AA
 lst <- c('ECM.L','HSBA.L','WIZZ.L','KAZ.L','RIO.L','STAN.L','JUP.L','FEVR.L')
 alst <- c('AMD','NVDA','GOOG','TSLA','AAPL','FB')
 
-lst <- c(shortlst)
+lst <- c(extlst)
 
 for (n in lst) {
+    try({
     obj <- getSymbols(n,src='google',env=NULL)
                                         # Check ADX
-    try({
-        adx <- last(ADX(obj['2017-01::']))$ADX[[1]]
-        macd <- last(MACD(obj[,4],12,26,9))$macd[[1]]
-        sma200 <- last(SMA(obj[,4],200))[[1]]
-        last <- last(obj[,4])[[1]]
-        sma <-  last(SMA(obj[,4]))[[1]]
-        ema <-  last(EMA(obj[,4],30))[[1]]
-    #print(paste(n,adx,macd,last))
-    if (adx<25 && last>sma200 && last<sma && last>ema){ # && macd>0){
+    adx <- last(ADX(obj['2017-01::']))$ADX[[1]]
+    div <- MACD(obj[,4],12,26,9)
+    div <- div$macd-div$signal
+    lastDiv <- last(div)[[1]]
+    prelastDiv <- div[nrow(div)-1,][[1]]
+    preprelastDiv <- div[nrow(div)-2,][[1]]
+    sma200 <- last(SMA(obj[,4],200))[[1]]
+    lst <- last(obj[,4])[[1]]
+    sma <-  last(SMA(obj[,4]))[[1]]
+    ema <-  last(EMA(obj[,4],30))[[1]]
+                                        #print(paste(n,adx,macd,last))
+    if (adx<25 && lst>sma200 && sma>ema && last(div)<0 && lastDiv>prelastDiv && prelastDiv>preprelastDiv){
     # Update quotes
     q <- getQuote(n)
     d <- Sys.Date()
@@ -39,6 +43,6 @@ for (n in lst) {
     #invisible(readline(prompt="Press [enter] to continue"))
                                         #chartSeries(obj,subset='last 4 months',TA=c(addSMA(),addEMA(30),addMACD(),addSMA(200),addVo(),addATR(20)),multi.col=FALSE,name=n)
     # addBBonds()
-    chartSeries(obj,subset='last 4 months',TA=c(addSMA(),addEMA(30),addMACD(),addSMA(200),addVo(),addADX()),multi.col=FALSE,name=n)
+        chartSeries(obj,subset='last 4 months',TA=c(addSMA(),addEMA(30),addMACD(),addSMA(200),addVo(),addADX()),multi.col=FALSE,name=n)
     invisible(readline(prompt="Press [enter] to continue"))
     }})}
