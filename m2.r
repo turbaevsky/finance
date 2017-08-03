@@ -11,22 +11,28 @@ lst <- c(extlst)
 
 for (n in lst) {
     try({
+    print(paste('Getting',n))	
     obj <- getSymbols(n,src='google',env=NULL)
                                         # Check ADX
-    adx <- last(ADX(obj['2017-01::']))$ADX[[1]]
-    div <- MACD(obj[,4],12,26,9)
+    adx <- last(ADX(obj['2017-01::'],maType='EMA'))$ADX[[1]]
+    div <- MACD(obj[,4],12,26,9,maType='EMA')
+    macd <- last(div)$macd[[1]]
     div <- div$macd-div$signal
     lastDiv <- last(div)[[1]]
     prelastDiv <- div[nrow(div)-1,][[1]]
     preprelastDiv <- div[nrow(div)-2,][[1]]
-    print(paste(n,lastDiv,prelastDiv,preprelastDiv))
+    #print(n)
     sma200 <- last(SMA(obj[,4],200))[[1]]
     lst <- last(obj[,4])[[1]]
     sma <-  last(SMA(obj[,4]))[[1]]
     ema <-  last(EMA(obj[,4],30))[[1]]
-                                        #print(paste(n,adx,macd,last))
-    if (adx<25 && lst>sma200 && sma>ema && lastDiv>prelastDiv && lastDiv>preprelastDiv && preprelastDiv<0){
+    #print(paste(n,'adx=',adx,'last=',lst,'sma200=',sma200,'macd=',macd,
+#'lastDiv=',lastDiv,',prelast=',prelastDiv,'first=',preprelastDiv))
+    print(paste('Testing',n))
+    if (adx<30 && lst>sma200 && macd>0 && lastDiv>=prelastDiv && prelastDiv>preprelastDiv && preprelastDiv<0){
     # Update quotes
+    print(paste('Plotting',n))
+    try({
     q <- getQuote(n)
     d <- Sys.Date()
     row.names(q)<- trunc(q[,"Trade Time"], units="days")
@@ -37,11 +43,12 @@ for (n in lst) {
                                         #obj <- merge(obj,q,by="Date")
     obj <- rbind(obj,q)
     obj <- obj[ ! duplicated( index(obj), fromLast = TRUE ),  ]
+    })
     #print(tail(obj))
     # Chart
     # MACD could be (5,34,5) to see Elliot's wave
-    #chartSeries(obj,subset='last 9 months',TA=c(addSMA(),addEMA(30),addMACD(),addSMA(200),addVo()),multi.col=FALSE,name=n)
-    #invisible(readline(prompt="Press [enter] to continue"))
+    chartSeries(obj,subset='last 9 months',TA=c(addSMA(),addEMA(30),addMACD(),addSMA(200),addVo()),multi.col=FALSE,name=n)
+    invisible(readline(prompt="Press [enter] to continue"))
                                         #chartSeries(obj,subset='last 4 months',TA=c(addSMA(),addEMA(30),addMACD(),addSMA(200),addVo(),addATR(20)),multi.col=FALSE,name=n)
     # addBBonds()
         chartSeries(obj,subset='last 4 months',TA=c(addSMA(),addEMA(30),addMACD(),addSMA(200),addVo(),addADX()),multi.col=FALSE,name=n)
