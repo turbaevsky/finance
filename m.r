@@ -22,18 +22,29 @@ plot(y[[1]],y[[2]],'l')
 }
 ##################### Read bid/ask ##################
 # https://github.com/DataWookie/flipsideR.git
-source('~/Desktop/flipsideR-master/R/option-chain.R')
-source('~/Desktop/flipsideR-master/R/configure.R')
+#source('~/Desktop/flipsideR-master/R/option-chain.R')
+#source('~/Desktop/flipsideR-master/R/configure.R')
 ########################################################
-stat <- function(data='~/Desktop/b886ck92.csv',series='S'){
+stat <- function(data='~/Desktop/b886ck92.csv',series='S',subset='last 9 months'){
 # '~/Desktop/b8qypr36.csv
     ck92 <- read.csv(data)
     ck <- toXTS(ck92)
     if (series=='S'){
-        chartSeries(ck)
-        addEMA()
+        chartSeries(ck,subset=subset,TA=c(addSMA(),addEMA(30),addMACD()))
         #addMACD()
+        #addEMA()
+        #addCCI()
+        #addRSI()
         }
     else if (series=='w') barplot(weeklyReturn(ck))
     else if (series=='m') barplot(monthlyReturn(ck))
+}
+#' Quote update
+upd <- function(){
+    d <- 'GB00B886CK92.L'
+    b <- 'GB00B8QYPR36.L'
+    uk <- '^UK50'
+    print(getQuote(d))
+    print(getQuote(b))
+    print(getQuote(uk))
 }

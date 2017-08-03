@@ -13,10 +13,14 @@ for (n in lst) {
     obj <- getSymbols(n,src='google',env=NULL)
                                         # Check ADX
     try({
-        last <- last(ADX(obj['2017-01::']))$ADX[[1]]
+        adx <- last(ADX(obj['2017-01::']))$ADX[[1]]
         macd <- last(MACD(obj[,4],12,26,9))$macd[[1]]
-    print(paste(n,last,macd))
-    if (last<30 && last>20 && macd>0){
+        sma200 <- last(SMA(obj[,4],200))[[1]]
+        last <- last(obj[,4])[[1]]
+        sma <-  last(SMA(obj[,4]))[[1]]
+        ema <-  last(EMA(obj[,4],30))[[1]]
+    #print(paste(n,adx,macd,last))
+    if (adx<25 && last>sma200 && last<sma && last>ema){ # && macd>0){
     # Update quotes
     q <- getQuote(n)
     d <- Sys.Date()
