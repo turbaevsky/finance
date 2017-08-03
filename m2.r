@@ -19,12 +19,13 @@ for (n in lst) {
     lastDiv <- last(div)[[1]]
     prelastDiv <- div[nrow(div)-1,][[1]]
     preprelastDiv <- div[nrow(div)-2,][[1]]
+    print(paste(n,lastDiv,prelastDiv,preprelastDiv))
     sma200 <- last(SMA(obj[,4],200))[[1]]
     lst <- last(obj[,4])[[1]]
     sma <-  last(SMA(obj[,4]))[[1]]
     ema <-  last(EMA(obj[,4],30))[[1]]
                                         #print(paste(n,adx,macd,last))
-    if (adx<25 && lst>sma200 && sma>ema && last(div)<0 && lastDiv>prelastDiv && prelastDiv>preprelastDiv){
+    if (adx<25 && lst>sma200 && sma>ema && lastDiv>prelastDiv && lastDiv>preprelastDiv && preprelastDiv<0){
     # Update quotes
     q <- getQuote(n)
     d <- Sys.Date()
@@ -36,7 +37,7 @@ for (n in lst) {
                                         #obj <- merge(obj,q,by="Date")
     obj <- rbind(obj,q)
     obj <- obj[ ! duplicated( index(obj), fromLast = TRUE ),  ]
-    print(tail(obj))
+    #print(tail(obj))
     # Chart
     # MACD could be (5,34,5) to see Elliot's wave
     #chartSeries(obj,subset='last 9 months',TA=c(addSMA(),addEMA(30),addMACD(),addSMA(200),addVo()),multi.col=FALSE,name=n)
