@@ -12,7 +12,14 @@ alst <- c('AMD','NVDA','GOOG','TSLA','AAPL','FB')
 
 us <- c('MSFT','JPM','BAC','ORCL','C','INTC','CSCO','BTI','MA','AMGN','ABBV','RY','CELG','NVDA','GILD','NPSNY','BMY','PCLN','MTU','GS','TXN','BNS','ADBE','ING','BLK','ASML','CNI','SCHW','BK','SMFG','REGN','BMO','AMAT','BX','SPGI','EBAY','BBT','CM','STT','ADI','STI','GLW','LRCX','BEN','AMTD','DFS','CP','FITB','TROW','CXO','RF','XLNX','KKR','LLTC','VNO','KLAC','HBAN','BSMX','MPLX','FLT','CMA','MXIM','SNI','ETFC','ANSS','AMG','VRSN','MSCI','SIVB','IBB','FANG','ZION','CGNX','SEIC','IPGP','WES','EWBC','AER','CPRT','SBS','SINA','ATHM','CFR','PACW','APO','UTHR','ANDX','OZRK','WAL','SNV','AGO','GNTX','PNFP','PVTB','SLM','WBS','PB','YY','MTG','AZPN','AL','FHN','IBKC','UMPQ','NAVI','TCBI','CUZ','ESNT','BKU','TEP','FR','HOMB','ASB','UBSI','MBFI','DST','FIG','FULT','STL','MANH','CATY','WAFD','AEIS','BXS','CXP','IUSG','MTDR','APAM','IUSV','HOPE','ONB','CPE','MC','ERF','SUPN','CORT','INN','TPRE','LADR','TGP','SFL','INVA','AAOI','OSUR','SOXX','IRDM','CFNL','CRBC','EGRX','IGD','FOR','SCLN','BCF')
 
-lst <- c(extuk,us)
+us2 <- c('CVM','TESO','NEFF','MRNS','GOLF','TOPS','XNET','ITR','WNRL','CRDS',
+'FRTA','PRKR','ZYNE','CLMT','SPHB','BW','USNA','CLH','DEI','DECT','NUS','NSTG',
+'ELP','SNAP','BBOX','CYH','CCE','NCI','PAM','JD','ALEX','HLF','GGAL','SSC',
+'BETR','VCLT','BFR','USAK','ARGT','VCEL','APPF','TOTL','MSTR','DOOR','WBT','TGS',
+'KEM','JMEI','STS','CYRX','EGLT','CSIQ','TEO','SJT','GEN','PGF','VMW','ENIA',
+'ZAGG','EIM','FOGO','DIOD','AVAL','WHF','BLW','NDRM','CALX','SYNC','THC')
+
+lst <- c(extuk,us2)
 
 for (n in lst) {
     try({
@@ -55,7 +62,7 @@ for (n in lst) {
     #print(tail(div))
 
 
-    if (lst>sma200 && low<sma && macd>0 && Div3>=Div2 && Div2>=Div1 && Div1<0){
+    if (lst>sma200 && macd>0 && Div3>=Div2 && Div2>=Div1 && Div1<0){
                                         # Update quotes
     print(paste(n,'adx=',adx,'last=',lst,'sma200=',sma200,'macd=',macd,
                 'lastDiv=',Div1,Div2,Div3,'atr=',atr,'sma10=',sma,'low=',low,'pctB=',pct))
