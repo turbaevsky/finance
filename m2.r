@@ -9,8 +9,8 @@ ftse250 <- c('3IN.L','AA.L','ASL.L','ACA.L','AGK.L','ALD.L','ATST.L','AMFW.L','A
 #####################################################################
 #####################################################################
 #lst <- shortlst
-lst <- sp500
-#lst <- ftse250
+#lst <- sp500
+lst <- ftse250
 
 for (n in lst) {
     try({
@@ -36,20 +36,22 @@ for (n in lst) {
     div <- MACD(obj[,4],12,26,9,maType='EMA')
     macd <- last(div)$macd[[1]]
     div <- div$macd-div$signal
-    Div3 <- last(div)[[1]]
-    Div2 <- div[nrow(div)-1,][[1]]
-    Div1 <- div[nrow(div)-2,][[1]]
+    #Div3 <- last(div)[[1]]
+    #Div2 <- div[nrow(div)-1,][[1]]
+    #Div1 <- div[nrow(div)-2,][[1]]
     #print(n)
     sma200 <- last(SMA(obj[,4],200))[[1]]
-    lst <- last(obj[,4])[[1]]
+    cls <- last(obj[,4])[[1]]
     low <- last(obj[,3])[[1]]
     sma <- last(SMA(obj[,4],10))[[1]]
     ema <- last(EMA(obj[,4],30))[[1]]
         atr <- last(ATR(obj))$atr[[1]]
         pct <- last(BBands(obj[,4]))$up[[1]]
-        pct <- (pct-lst)/pct
+        pct <- (pct-cls)/pct
 
-        volat <- last(volatility(obj))[[1]]
+        #volat <- last(ADR(obj))[[1]] # If you’re swing trading, you want stocks that show high ADRs.
+        rsi <- last(RSI(obj[,4],2))[[1]]
+        bol <- last(BBands(obj[,c(2:4)]))
         #print(volat,calc='Close')
     #print(paste(n,'adx=',adx,'last=',lst,'sma200=',sma200,'macd=',macd,
 #'lastDiv=',lastDiv,',prelast=',prelastDiv,'first=',preprelastDiv))
@@ -57,25 +59,24 @@ for (n in lst) {
                                         #print(tail(div))
                                         # Check unusial volume
         lastV <- head(tail(obj[,5],2),1)[[1]]
-        avgV <- mean(unlist(head(tail(obj[,5],5),3)))[[1]] # Avg of last 3 elements
+        avgV <- mean(unlist(head(tail(obj[,5],32),30)))[[1]] # Avg of last 30 elements
         factor <- lastV/avgV
         #print(tail(obj))
-        #print(paste(n,'fact=',factor,'last=',lastV,'avg=',avgV))
+        #print(paste(n,'Cls=',cls,'SMA5=',sma,'RSI2=',rsi))
 ############################################################################
 ############################################################################
-    if (factor>=1.2 && avgV>=1e5 && lst>sma200 && macd>0 && Div3>=Div2 && Div2>=Div1 && Div1<0){
-                                        # Update quotes
-    print(paste(n,'adx=',adx,'last=',lst,'sma200=',sma200,'macd=',macd,
-                'lastDiv=',Div1,Div2,Div3,'atr=',atr,'sma10=',sma,
-                'low=',low,'pctB=',pct,'volat.=',volat,'Vol.fact=',factor))
-    print(paste('Plotting',n))
-    print(tail(obj))
-    # Chart
+        p <- length(div)
+        if (avgV>=3e5 && cls>sma200 && cls>=5 && div[p-2][[1]]>div[p-1][[1]] && div[p-1][[1]]<div[p][[1]]){# && div[p-1][[1]]<div[p][[1]] && low<=bol[[1]]){
+            print(paste(n,'adx=',adx,'last=',cls,'sma200=',sma200,'macd=',macd,'lastDiv=',div[p-2],div[p-1],div[p],'atr=',atr,'sma5=',sma,'low=',low,'pctB=',pct,'Vol.fact=',factor,'rsi=',rsi,'BBands=',bol[[1]],bol[[2]],bol[[3]]))
+
+            print(paste('Plotting',n))
+            print(tail(obj))
+    # Chart ################################################################
     # MACD could be (5,34,5) to see Elliot's wave
     #chartSeries(obj,subset='last 4 months',TA=c(addSMA(),addEMA(30),addMACD(),addSMA(200),addVo(),addATR(20)),multi.col=FALSE,name=n)
     # addBBonds()
-        chartSeries(obj,subset='last 4 months',TA=c(addSMA(),addEMA(30),addMACD(),addSMA(200),addVo()),multi.col=FALSE,name=n)
-        invisible(readline(prompt="Press [enter] to continue"))
-        chartSeries(obj,subset='last 9 months',TA=c(addSMA(),addEMA(30),addMACD(),addSMA(200),addVo()),multi.col=FALSE,name=n)
-        invisible(readline(prompt="Press [enter] to continue"))
+            chartSeries(obj,subset='last 4 months',TA=c(addSMA(),addEMA(30),addMACD(),addVo(),addBBands()),multi.col=FALSE,name=n)
+            invisible(readline(prompt="Press [enter] to continue"))
+            chartSeries(obj,subset='last 9 months',TA=c(addSMA(),addEMA(30),addSMA(200),addVo()),multi.col=FALSE,name=n)
+            invisible(readline(prompt="Press [enter] to continue"))
     }})}
