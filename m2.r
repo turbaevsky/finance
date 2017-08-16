@@ -66,7 +66,7 @@ for (n in lst) {
 ############################################################################
 ############################################################################
         p <- length(div)
-        if (avgV>=3e5 && cls>sma200 && cls>=5 && div[p-2][[1]]>div[p-1][[1]] && div[p-1][[1]]<div[p][[1]]){# && div[p-1][[1]]<div[p][[1]] && low<=bol[[1]]){
+        if (avgV>=3e5 && cls>sma200 && cls>=5 && div[p-3][[1]]>div[p-2][[1]] && div[p-2][[1]]<div[p-1][[1]] && div[p-1][[1]]<div[p][[1]]){# && low<=bol[[1]]){
             print(paste(n,'adx=',adx,'last=',cls,'sma200=',sma200,'macd=',macd,'lastDiv=',div[p-2],div[p-1],div[p],'atr=',atr,'sma5=',sma,'low=',low,'pctB=',pct,'Vol.fact=',factor,'rsi=',rsi,'BBands=',bol[[1]],bol[[2]],bol[[3]]))
 
             print(paste('Plotting',n))
