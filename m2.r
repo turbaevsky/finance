@@ -6,75 +6,75 @@ ftse250 <- c('3IN.L','AA.L','ASL.L','ACA.L','AGK.L','ALD.L','ATST.L','AMFW.L','A
 
 #####################################################################
 #####################################################################
-shortlst <- c('FXPO.L','KAZ.L')
+shortlst <- c('FXPO.L','KAZ.L','EL')
 #lst <- shortlst
-quotes <- TRUE
-web <- FALSE
-lst <- sp500
+#quotes <- TRUE
+#web <- TRUE
+#lst <- sp500
 #lst <- ftse250
 #####################################################################
-for (n in lst) {
-    try({
-        print(paste('Getting',n))
-        obj <- getSymbols(n,src='google',env=NULL)
-        obj <- na.omit(obj)
-        # get quotes
-        if (quotes || lst==shortlst){
-            q <- getQuote(n)
-            d <- Sys.Date()
-            row.names(q)<- trunc(q[,"Trade Time"], units="days")
-            q <- q[,c("Open","High","Low","Last","Volume")]
-            names(q) <- c("Open","High","Low","Close","Volume")
-            q <- xts(q,d)
-            obj <- rbind(obj,q)
-            obj <- obj[!duplicated(index(obj),fromLast = TRUE ),]
-        }
+analyse <- function(lst=ftse250,quotes=TRUE,web=TRUE){
+    for (n in lst) {
+        try({
+            print(paste('Getting',n))
+            obj <- getSymbols(n,src='google',env=NULL)
+            obj <- na.omit(obj)
+                                        # get quotes
+            if (quotes || lst==shortlst){
+                q <- getQuote(n)
+                d <- Sys.Date()
+                row.names(q)<- trunc(q[,"Trade Time"], units="days")
+                q <- q[,c("Open","High","Low","Last","Volume")]
+                names(q) <- c("Open","High","Low","Close","Volume")
+                q <- xts(q,d)
+                obj <- rbind(obj,q)
+                obj <- obj[!duplicated(index(obj),fromLast = TRUE ),]
+            }
 
-        adx <- last(ADX(obj[,c(2,3,4)]))$ADX[[1]]
-        div <- MACD(obj[,4],12,26,9,maType='EMA')
-        MACD <- div
-        macd <- last(div)$macd[[1]]
-        div <- div$macd-div$signal
-        sma200 <- last(SMA(obj[,4],200))[[1]]
-        cls <- last(obj[,4])[[1]]
-        low <- last(obj[,3])[[1]]
-        sma <- last(SMA(obj[,4],10))[[1]]
-        lsma <- SMA(obj[,4])
-        lsma15 <- lsma[length(lsma)-15][[1]]
-        change15 <- (sma-lsma15)/sma*100
-        lsma5 <- lsma[length(lsma)-5][[1]]
-        change5 <- (sma-lsma5)/sma*100
-        ema <- last(EMA(obj[,4],30))[[1]]
-        atr <- last(ATR(obj))$atr[[1]]
-        pct <- last(BBands(obj[,4]))$up[[1]]
-        pct <- (pct-cls)/pct
-        #volat <- last(ADR(obj))[[1]] # If you’re swing trading, you want stocks that show high ADRs.
-        #print(volat,calc='Close')
-        rsi <- last(RSI(obj[,4]))[[1]]
-        bol <- last(BBands(obj[,c(2:4)]))
-        # Check unusial volume
-        lastV <- head(tail(obj[,5],2),1)[[1]]
-        avgV <- mean(unlist(head(tail(obj[,5],32),30)))[[1]] # Avg of last 30 elements
-        factor <- lastV/avgV
-        p <- length(div)
-        #print(paste(n,'div=',div[p-3][[1]],div[p-2][[1]],div[p-1][[1]],div[p][[1]],'MACD=',macd,'ADX=',adx,'avgVol=',avgV,'SMA200=',sma200,'Close=',cls))
+            adx <- last(ADX(obj[,c(2,3,4)]))$ADX[[1]]
+            div <- MACD(obj[,4],12,26,9,maType='EMA')
+            MACD <- div
+            macd <- last(div)$macd[[1]]
+            div <- div$macd-div$signal
+            sma200 <- last(SMA(obj[,4],200))[[1]]
+            cls <- last(obj[,4])[[1]]
+            low <- last(obj[,3])[[1]]
+            sma <- last(SMA(obj[,4],10))[[1]]
+            lsma <- SMA(obj[,4])
+            lsma15 <- lsma[length(lsma)-15][[1]]
+            change15 <- (sma-lsma15)/sma*100
+            lsma5 <- lsma[length(lsma)-5][[1]]
+            change5 <- (sma-lsma5)/sma*100
+            ema <- last(EMA(obj[,4],30))[[1]]
+            atr <- last(ATR(obj))$atr[[1]]
+            pct <- last(BBands(obj[,4]))$up[[1]]
+            pct <- (pct-cls)/pct
+                                        #volat <- last(ADR(obj))[[1]] # If you’re swing trading, you want stocks that show high ADRs.
+                                        #print(volat,calc='Close')
+            rsi <- last(RSI(obj[,4]))[[1]]
+            bol <- last(BBands(obj[,c(2:4)]))
+                                        # Check unusial volume
+            lastV <- head(tail(obj[,5],2),1)[[1]]
+            avgV <- mean(unlist(head(tail(obj[,5],32),30)))[[1]] # Avg of last 30 elements
+            factor <- lastV/avgV
+            p <- length(div)
+                                        #print(paste(n,'div=',div[p-3][[1]],div[p-2][[1]],div[p-1][[1]],div[p][[1]],'MACD=',macd,'ADX=',adx,'avgVol=',avgV,'SMA200=',sma200,'Close=',cls))
 ############################################################################
 ############################################################################
-        if ((lst==shortlst)
-            || (avgV>=1e5 && cls>sma200 && cls>=5 &&
-            ((div[p-3][[1]]>div[p-2][[1]] && div[p-2][[1]]<div[p-1][[1]] && div[p-1][[1]]<div[p][[1]])
-                || (div[p-2][[1]]>div[p-1][[1]] && div[p-1][[1]]<div[p][[1]]))
-            && macd>0 && adx>=25)){# && low<=bol[[1]]){
+            if (avgV>=1e5 && cls>sma200 && cls>=5 &&
+                ((div[p-3][[1]]>div[p-2][[1]] && div[p-2][[1]]<div[p-1][[1]] && div[p-1][[1]]<div[p][[1]])
+                    || (div[p-2][[1]]>div[p-1][[1]] && div[p-1][[1]]<div[p][[1]]))
+                && macd>0 && adx>=25){# && low<=bol[[1]]){
 
-            print(paste('Plotting',n,'adx=',round(adx),'atr=',round(atr),'rsi14(30long/70short)=',round(rsi),'change 1w/3w=',signif(change5,2),'%/',signif(change15,2),'%'))
-            if (web==TRUE)
-                browseURL(paste('https://finance.yahoo.com/calendar/earnings?day=',format(Sys.Date(),'%Y-%m-%d'),'&symbol=',n,sep=''))
-            print(tail(obj))
-            print(tail(merge(div,MACD)))
+                print(paste('Plotting',n,'adx=',round(adx),'atr=',round(atr),'rsi14(30long/70short)=',round(rsi),'change 1w/3w=',signif(change5,2),'%/',signif(change15,2),'%'))
+                if (web==TRUE)
+                    browseURL(paste('https://finance.yahoo.com/calendar/earnings?day=',format(Sys.Date(),'%Y-%m-%d'),'&symbol=',n,sep=''))
+                print(tail(obj))
+                print(tail(merge(div,MACD)))
 # Chart ################################################################
 # MACD could be (5,34,5) to see Elliot's wave
-            chartSeries(obj,subset='last 4 months',TA=c(addSMA(),addEMA(30),addMACD(),addVo()),multi.col=FALSE,name=n)
-            invisible(readline(prompt="Press [enter] to continue"))
-            chartSeries(obj,subset='last 9 months',TA=c(addSMA(200),addBBands(),addMACD(),addVo()),multi.col=FALSE,name=n)
-            invisible(readline(prompt="Press [enter] to continue"))
-        }})}
+                chartSeries(obj,subset='last 4 months',TA=c(addSMA(),addEMA(30),addMACD(),addVo()),multi.col=FALSE,name=n)
+                invisible(readline(prompt="Press [enter] to continue"))
+                chartSeries(obj,subset='last 9 months',TA=c(addSMA(200),addBBands(),addMACD(),addVo()),multi.col=FALSE,name=n)
+                invisible(readline(prompt="Press [enter] to continue"))
+            }})}}
