@@ -20,7 +20,7 @@ analyse <- function(lst=ftse250,quotes=TRUE,web=TRUE){
             obj <- getSymbols(n,src='google',env=NULL)
             obj <- na.omit(obj)
                                         # get quotes
-            if (quotes || lst==shortlst){
+            if (quotes){
                 q <- getQuote(n)
                 d <- Sys.Date()
                 row.names(q)<- trunc(q[,"Trade Time"], units="days")
@@ -32,10 +32,10 @@ analyse <- function(lst=ftse250,quotes=TRUE,web=TRUE){
             }
 
             adx <- last(ADX(obj[,c(2,3,4)]))$ADX[[1]]
-            div <- MACD(obj[,4],12,26,9,maType='EMA')
-            MACD <- div
-            macd <- last(div)$macd[[1]]
-            div <- div$macd-div$signal
+            macd <- MACD(obj[,4],12,26,9,maType='EMA')
+            lmacd <- last(macd)$macd[[1]]
+            lsig <- last(macd)$signal[[1]]
+            div <- macd$macd-macd$signal
             sma200 <- last(SMA(obj[,4],200))[[1]]
             cls <- last(obj[,4])[[1]]
             low <- last(obj[,3])[[1]]
@@ -61,16 +61,22 @@ analyse <- function(lst=ftse250,quotes=TRUE,web=TRUE){
                                         #print(paste(n,'div=',div[p-3][[1]],div[p-2][[1]],div[p-1][[1]],div[p][[1]],'MACD=',macd,'ADX=',adx,'avgVol=',avgV,'SMA200=',sma200,'Close=',cls))
 ############################################################################
 ############################################################################
+            k <- 0.05
             if (avgV>=1e5 && cls>sma200 && cls>=5 &&
                 ((div[p-3][[1]]>div[p-2][[1]] && div[p-2][[1]]<div[p-1][[1]] && div[p-1][[1]]<div[p][[1]])
-                    || (div[p-2][[1]]>div[p-1][[1]] && div[p-1][[1]]<div[p][[1]]))
-                && macd>0 && adx>=25){# && low<=bol[[1]]){
+                    || (div[p-2][[1]]>div[p-1][[1]] && div[p-1][[1]]<div[p][[1]]) || ((1+k)*lsig>=lmacd && (1-k)*lsig<=lmacd)) 
+                && lmacd>0 && adx>=25){# && low<=bol[[1]]){
+                cond <- ''
+                if (div[p-3][[1]]>div[p-2][[1]] && div[p-2][[1]]<div[p-1][[1]] && div[p-1][[1]]<div[p][[1]]) cond <- paste(cond,'two risen divs')
+                if (div[p-2][[1]]>div[p-1][[1]] && div[p-1][[1]]<div[p][[1]])
+                    cond <- paste(cond,'hole divs')
+                if ((1+k)*lsig>=lmacd && (1-k)*lsig<=lmacd) cond <- paste(cond,'macd crossed signal')
 
-                print(paste('Plotting',n,'adx=',round(adx),'atr=',round(atr),'rsi14(30long/70short)=',round(rsi),'change 1w/3w=',signif(change5,2),'%/',signif(change15,2),'%'))
+                print(paste('Plotting',n,'because',cond,', adx=',round(adx),'atr=',round(atr),'rsi14(30long/70short)=',round(rsi),'change 1w/3w=',signif(change5,2),'%/',signif(change15,2),'%'))
                 if (web==TRUE)
                     browseURL(paste('https://finance.yahoo.com/calendar/earnings?day=',format(Sys.Date(),'%Y-%m-%d'),'&symbol=',n,sep=''))
                 print(tail(obj))
-                print(tail(merge(div,MACD)))
+                print(tail(merge(div,macd)))
 # Chart ################################################################
 # MACD could be (5,34,5) to see Elliot's wave
                 chartSeries(obj,subset='last 4 months',TA=c(addSMA(),addEMA(30),addMACD(),addVo()),multi.col=FALSE,name=n)
