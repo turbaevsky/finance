@@ -6,7 +6,7 @@ ftse250 <- c('3IN.L','AA.L','ASL.L','ACA.L','AGK.L','ALD.L','ATST.L','AMFW.L','A
 
 #####################################################################
 #####################################################################
-shortlst <- c('FXPO.L','KAZ.L','EL')
+shortlst <- c('FXPO.L','KAZ.L','EL','SHI.L','SSPG.L','TCG.L')
 #lst <- shortlst
 #quotes <- TRUE
 #web <- TRUE
@@ -67,20 +67,20 @@ analyse <- function(lst=ftse250,quotes=TRUE,web=TRUE){
                     || (div[p-2][[1]]>div[p-1][[1]] && div[p-1][[1]]<div[p][[1]]) || ((1+k)*lsig>=lmacd && (1-k)*lsig<=lmacd)) 
                 && lmacd>0 && adx>=25){# && low<=bol[[1]]){
                 cond <- ''
-                if (div[p-3][[1]]>div[p-2][[1]] && div[p-2][[1]]<div[p-1][[1]] && div[p-1][[1]]<div[p][[1]]) cond <- paste(cond,'two risen divs')
+                if (div[p-3][[1]]>div[p-2][[1]] && div[p-2][[1]]<div[p-1][[1]] && div[p-1][[1]]<div[p][[1]]) cond <- paste(cond,'two risen divs,')
                 if (div[p-2][[1]]>div[p-1][[1]] && div[p-1][[1]]<div[p][[1]])
-                    cond <- paste(cond,'hole divs')
-                if ((1+k)*lsig>=lmacd && (1-k)*lsig<=lmacd) cond <- paste(cond,'macd crossed signal')
+                    cond <- paste(cond,'hole divs,')
+                if ((1+k)*lsig>=lmacd && (1-k)*lsig<=lmacd) cond <- paste(cond,'macd crossed signal,')
 
-                print(paste('Plotting',n,'because',cond,', adx=',round(adx),'atr=',round(atr),'rsi14(30long/70short)=',round(rsi),'change 1w/3w=',signif(change5,2),'%/',signif(change15,2),'%'))
+                print(paste('Plotting',n,'because of',cond,'adx=',round(adx),'atr=',round(atr),'rsi14(30long/70short)=',round(rsi),'change 1w/3w=',signif(change5,2),'%/',signif(change15,2),'%'))
                 if (web==TRUE)
                     browseURL(paste('https://finance.yahoo.com/calendar/earnings?day=',format(Sys.Date(),'%Y-%m-%d'),'&symbol=',n,sep=''))
                 print(tail(obj))
                 print(tail(merge(div,macd)))
 # Chart ################################################################
 # MACD could be (5,34,5) to see Elliot's wave
-                chartSeries(obj,subset='last 4 months',TA=c(addSMA(),addEMA(30),addMACD(),addVo()),multi.col=FALSE,name=n)
+                chartSeries(obj,subset='last 4 months',TA=c(addSMA(),addEMA(30),addBBands(),addMACD(),addVo()),multi.col=FALSE,name=n)
                 invisible(readline(prompt="Press [enter] to continue"))
-                chartSeries(obj,subset='last 9 months',TA=c(addSMA(200),addBBands(),addMACD(),addVo()),multi.col=FALSE,name=n)
+                chartSeries(obj,subset='last 9 months',TA=c(addSMA(200),addMACD(5,34,5),addSMA(),addEMA(30),addVo()),multi.col=FALSE,name=n)
                 invisible(readline(prompt="Press [enter] to continue"))
             }})}}
