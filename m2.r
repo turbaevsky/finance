@@ -13,7 +13,7 @@ shortlst <- c('FXPO.L','KAZ.L','EL','SHI.L','SSPG.L','TCG.L')
 #lst <- sp500
 #lst <- ftse250
 #####################################################################
-analyse <- function(lst=ftse250,quotes=TRUE,web=TRUE){
+analyse <- function(lst=ftse250,quotes=TRUE,web=TRUE,change=5){
     for (n in lst) {
         try({
             print(paste('Getting',n))
@@ -65,7 +65,7 @@ analyse <- function(lst=ftse250,quotes=TRUE,web=TRUE){
             if (avgV>=1e5 && cls>sma200 && cls>=5 &&
                 ((div[p-3][[1]]>div[p-2][[1]] && div[p-2][[1]]<div[p-1][[1]] && div[p-1][[1]]<div[p][[1]])
                     || (div[p-2][[1]]>div[p-1][[1]] && div[p-1][[1]]<div[p][[1]]) || ((1+k)*lsig>=lmacd && (1-k)*lsig<=lmacd)) 
-                && lmacd>0 && adx>=25){# && low<=bol[[1]]){
+                && lmacd>0 && adx>=25 && change15>change){# && low<=bol[[1]]){
                 cond <- ''
                 if (div[p-3][[1]]>div[p-2][[1]] && div[p-2][[1]]<div[p-1][[1]] && div[p-1][[1]]<div[p][[1]]) cond <- paste(cond,'two risen divs,')
                 if (div[p-2][[1]]>div[p-1][[1]] && div[p-1][[1]]<div[p][[1]])
@@ -80,8 +80,8 @@ analyse <- function(lst=ftse250,quotes=TRUE,web=TRUE){
                 if (quotes) print(getQuote(n))
 # Chart ################################################################
 # MACD could be (5,34,5) to see Elliot's wave
-                chartSeries(obj,subset='last 4 months',TA=c(addSMA(),addEMA(30),addBBands(),addMACD(),addVo()),multi.col=FALSE,name=n)
+                chartSeries(obj,subset='last 9 months',TA=c(addSMA(200),addMACD(),addSMA(),addEMA(30),addVo()),multi.col=FALSE,name=n)
                 invisible(readline(prompt="Press [enter] to continue"))
-                chartSeries(obj,subset='last 9 months',TA=c(addSMA(200),addMACD(5,34,5),addSMA(),addEMA(30),addVo()),multi.col=FALSE,name=n)
+                chartSeries(obj,subset='last 4 months',TA=c(addSMA(),addEMA(30),addBBands(),addMACD(),addVo()),multi.col=FALSE,name=n)
                 invisible(readline(prompt="Press [enter] to continue"))
             }})}}
