@@ -77,6 +77,7 @@ analyse <- function(lst=ftse250,quotes=TRUE,web=TRUE){
                     browseURL(paste('https://finance.yahoo.com/calendar/earnings?day=',format(Sys.Date(),'%Y-%m-%d'),'&symbol=',n,sep=''))
                 print(tail(obj))
                 print(tail(merge(div,macd)))
+                if (quotes) print(getQuote(n))
 # Chart ################################################################
 # MACD could be (5,34,5) to see Elliot's wave
                 chartSeries(obj,subset='last 4 months',TA=c(addSMA(),addEMA(30),addBBands(),addMACD(),addVo()),multi.col=FALSE,name=n)
