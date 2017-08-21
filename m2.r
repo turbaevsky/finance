@@ -6,14 +6,14 @@ ftse250 <- c('3IN.L','AA.L','ASL.L','ACA.L','AGK.L','ALD.L','ATST.L','AMFW.L','A
 
 #####################################################################
 #####################################################################
-shortlst <- c('FXPO.L','KAZ.L','EL','SHI.L','SSPG.L','TCG.L')
+shortlst <- c('FXPO.L','TCG.L','WIZZ.L')
 #lst <- shortlst
 #quotes <- TRUE
 #web <- TRUE
 #lst <- sp500
 #lst <- ftse250
 #####################################################################
-analyse <- function(lst=ftse250,quotes=TRUE,web=TRUE,change=5){
+analyse <- function(lst=ftse250,quotes=TRUE,web=FALSE,change=5){
     for (n in lst) {
         try({
             print(paste('Getting',n))
@@ -41,6 +41,8 @@ analyse <- function(lst=ftse250,quotes=TRUE,web=TRUE,change=5){
             low <- last(obj[,3])[[1]]
             sma <- last(SMA(obj[,4],10))[[1]]
             lsma <- SMA(obj[,4])
+            lsma50 <- lsma[length(lsma)-50][[1]]
+            change50 <- (sma-lsma50)/sma*100
             lsma15 <- lsma[length(lsma)-15][[1]]
             change15 <- (sma-lsma15)/sma*100
             lsma5 <- lsma[length(lsma)-5][[1]]
@@ -64,7 +66,7 @@ analyse <- function(lst=ftse250,quotes=TRUE,web=TRUE,change=5){
             k <- 0.05
             if (avgV>=1e5 && cls>sma200 && cls>=5 &&
                 ((div[p-3][[1]]>div[p-2][[1]] && div[p-2][[1]]<div[p-1][[1]] && div[p-1][[1]]<div[p][[1]])
-                    || (div[p-2][[1]]>div[p-1][[1]] && div[p-1][[1]]<div[p][[1]]) || ((1+k)*lsig>=lmacd && (1-k)*lsig<=lmacd)) 
+                    || (div[p-2][[1]]>div[p-1][[1]] && div[p-1][[1]]<div[p][[1]]) || ((1+k)*lsig>=lmacd && (1-k)*lsig<=lmacd))
                 && lmacd>0 && adx>=25 && change15>change){# && low<=bol[[1]]){
                 cond <- ''
                 if (div[p-3][[1]]>div[p-2][[1]] && div[p-2][[1]]<div[p-1][[1]] && div[p-1][[1]]<div[p][[1]]) cond <- paste(cond,'two risen divs,')
@@ -72,16 +74,17 @@ analyse <- function(lst=ftse250,quotes=TRUE,web=TRUE,change=5){
                     cond <- paste(cond,'hole divs,')
                 if ((1+k)*lsig>=lmacd && (1-k)*lsig<=lmacd) cond <- paste(cond,'macd crossed signal,')
 
-                print(paste('Plotting',n,'because of',cond,'adx=',round(adx),'atr=',round(atr),'rsi14(30long/70short)=',round(rsi),'change 1w/3w=',signif(change5,2),'%/',signif(change15,2),'%'))
+                print(paste('Plotting',n,'because of',cond,'adx=',round(adx),'atr=',round(atr),'rsi14(30long/70short)=',round(rsi),'change,% 1w/3w/3m=',signif(change5,2),'/',signif(change15,2),'/',signif(change50,2)))
                 if (web==TRUE)
                     browseURL(paste('https://finance.yahoo.com/calendar/earnings?day=',format(Sys.Date(),'%Y-%m-%d'),'&symbol=',n,sep=''))
                 print(tail(obj))
                 print(tail(merge(div,macd)))
-                if (quotes) print(getQuote(n))
+                if (quotes) {print(getQuote(n)); try(print(getOptionChain(n)))}
+
 # Chart ################################################################
 # MACD could be (5,34,5) to see Elliot's wave
                 chartSeries(obj,subset='last 9 months',TA=c(addSMA(200),addMACD(),addSMA(),addEMA(30),addVo()),multi.col=FALSE,name=n)
                 invisible(readline(prompt="Press [enter] to continue"))
-                chartSeries(obj,subset='last 4 months',TA=c(addSMA(),addEMA(30),addBBands(),addMACD(),addVo()),multi.col=FALSE,name=n)
+                chartSeries(obj,subset='last 3 months',TA=c(addSMA(),addEMA(30),addBBands(),addMACD(),addVo()),multi.col=FALSE,name=n)
                 invisible(readline(prompt="Press [enter] to continue"))
             }})}}
