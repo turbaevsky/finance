@@ -64,10 +64,10 @@ analyse <- function(lst=ftse250,quotes=TRUE,web=FALSE,change=5){
 ############################################################################
 ############################################################################
             k <- 0.05
-            if (avgV>=1e5 && cls>sma200 && cls>=5 &&
+            if (n %in% shortlst || (avgV>=1e5 && cls>sma200 && cls>=5 &&
                 ((div[p-3][[1]]>div[p-2][[1]] && div[p-2][[1]]<div[p-1][[1]] && div[p-1][[1]]<div[p][[1]])
                     || (div[p-2][[1]]>div[p-1][[1]] && div[p-1][[1]]<div[p][[1]]) || ((1+k)*lsig>=lmacd && (1-k)*lsig<=lmacd))
-                && lmacd>0 && adx>=25 && change15>change){# && low<=bol[[1]]){
+                && lmacd>0 && adx>=25 && change15>change)){# && low<=bol[[1]]){
                 cond <- ''
                 if (div[p-3][[1]]>div[p-2][[1]] && div[p-2][[1]]<div[p-1][[1]] && div[p-1][[1]]<div[p][[1]]) cond <- paste(cond,'two risen divs,')
                 if (div[p-2][[1]]>div[p-1][[1]] && div[p-1][[1]]<div[p][[1]])
@@ -79,7 +79,7 @@ analyse <- function(lst=ftse250,quotes=TRUE,web=FALSE,change=5){
                     browseURL(paste('https://finance.yahoo.com/calendar/earnings?day=',format(Sys.Date(),'%Y-%m-%d'),'&symbol=',n,sep=''))
                 print(tail(obj))
                 print(tail(merge(div,macd)))
-                if (quotes) {print(getQuote(n)); try(print(getOptionChain(n)))}
+                if (quotes) try(print(getOptionChain(n)))
 
 # Chart ################################################################
 # MACD could be (5,34,5) to see Elliot's wave
