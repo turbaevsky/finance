@@ -7,6 +7,10 @@ ftse250 <- c('3IN.L','AA.L','ASL.L','ACA.L','AGK.L','ALD.L','ATST.L','AMFW.L','A
 #####################################################################
 #####################################################################
 shortlst <- c('FXPO.L','TCG.L','WIZZ.L')
+lim <- c(272.7,0,0) # Stop-loss limit
+stocks <- c(350,0,0) # No of stocks
+tax <- c((10.5+4.96),0,0) # Taxes
+long <- c(280.44,0,0) # Buying price
 #lst <- shortlst
 #quotes <- TRUE
 #web <- TRUE
@@ -80,11 +84,19 @@ analyse <- function(lst=ftse250,quotes=TRUE,web=FALSE,change=5){
                 print(tail(obj))
                 print(tail(merge(div,macd)))
                 if (quotes) try(print(getOptionChain(n)))
-
+                if (n %in% shortlst){
+                    no <- which(shortlst == n)
+                    balance <- stocks[no]/100*cls-tax[no]-stocks[no]/100*long[no]
+                    print(paste('Balance=',signif(balance,3)))
+                }
+                no <- which(shortlst == n)
 # Chart ################################################################
-# MACD could be (5,34,5) to see Elliot's wave
-                chartSeries(obj,subset='last 9 months',TA=c(addSMA(200),addMACD(),addSMA(),addEMA(30),addVo()),multi.col=FALSE,name=n)
+                                        # MACD could be (5,34,5) to see Elliot's wave
+
+                chartSeries(obj,subset='last 9 months',TA=c(addSMA(200),addMACD(),addSMA(),addEMA(30),addVo()),multi.col=FALSE,name=n,log.scale=T)
+                plot(addLines(h=lim[no],col='red'))
                 invisible(readline(prompt="Press [enter] to continue"))
-                chartSeries(obj,subset='last 3 months',TA=c(addSMA(),addEMA(30),addBBands(),addMACD(),addVo()),multi.col=FALSE,name=n)
+                chartSeries(obj,subset='last 3 months',TA=c(addSMA(),addEMA(30),addBBands(),addMACD(),addVo()),multi.col=FALSE,name=n,log.scale=T)
+                plot(addLines(h=lim[no],col='red'))
                 invisible(readline(prompt="Press [enter] to continue"))
             }})}}
