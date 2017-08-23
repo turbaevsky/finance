@@ -100,3 +100,7 @@ analyse <- function(lst=ftse250,quotes=TRUE,web=FALSE,change=5){
                 plot(addLines(h=lim[no],col='red'))
                 invisible(readline(prompt="Press [enter] to continue"))
             }})}}
+
+ticker <- function(min=10){
+    while (T) {print(format(Sys.time(),'%H:%M')); print(getQuote(shortlst[1])); Sys.sleep(60*min)}
+    }
