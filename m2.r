@@ -6,34 +6,38 @@ ftse250 <- c('3IN.L','AA.L','ASL.L','ACA.L','AGK.L','ALD.L','ATST.L','AMFW.L','A
 
 #####################################################################
 #####################################################################
-shortlst <- c('FXPO.L','TCG.L','WIZZ.L')
-lim <- c(272.7,0,0) # Stop-loss limit
-stocks <- c(350,0,0) # No of stocks
-tax <- c((10.5+4.96),0,0) # Taxes
-long <- c(280.44,0,0) # Buying price
+shortlst <- c('FXPO.L','KAZ.L','WIZZ.L','EMG.L','ECM.L','BOY.L')
+lim <- c(280.7,0,0,0,0) # Stop-loss limit
+stocks <- c(350,0,0,0,0,0) # No of stocks
+tax <- c((10.5+4.96),0,0,0,0,0) # Taxes
+long <- c(280.44,0,0,0,0,0) # Buying price
 #lst <- shortlst
 #quotes <- TRUE
 #web <- TRUE
 #lst <- sp500
-#lst <- ftse250
+                                        #lst <- ftse250
+
 #####################################################################
-analyse <- function(lst=ftse250,quotes=TRUE,web=FALSE,change=5){
+updQuote <- function(obj,n) #Update price table by actual quotes
+{
+    q <- getQuote(n)
+    d <- Sys.Date()
+    row.names(q)<- trunc(q[,"Trade Time"], units="days")
+    q <- q[,c("Open","High","Low","Last","Volume")]
+    names(q) <- c("Open","High","Low","Close","Volume")
+    q <- xts(q,d)
+    obj <- rbind(obj,q)
+    obj <- obj[!duplicated(index(obj),fromLast = TRUE ),]
+    return(obj)
+}
+#####################################################################
+analyse <- function(lst=ftse250,quotes=TRUE,web=FALSE,change=5,adx=25){
     for (n in lst) {
         try({
             print(paste('Getting',n))
             obj <- getSymbols(n,src='google',env=NULL)
             obj <- na.omit(obj)
-                                        # get quotes
-            if (quotes){
-                q <- getQuote(n)
-                d <- Sys.Date()
-                row.names(q)<- trunc(q[,"Trade Time"], units="days")
-                q <- q[,c("Open","High","Low","Last","Volume")]
-                names(q) <- c("Open","High","Low","Close","Volume")
-                q <- xts(q,d)
-                obj <- rbind(obj,q)
-                obj <- obj[!duplicated(index(obj),fromLast = TRUE ),]
-            }
+            if (quotes) obj <- updQuote(obj,n)
 
             adx <- last(ADX(obj[,c(2,3,4)]))$ADX[[1]]
             macd <- MACD(obj[,4],12,26,9,maType='EMA')
@@ -71,14 +75,14 @@ analyse <- function(lst=ftse250,quotes=TRUE,web=FALSE,change=5){
             if (n %in% shortlst || (avgV>=1e5 && cls>sma200 && cls>=5 &&
                 ((div[p-3][[1]]>div[p-2][[1]] && div[p-2][[1]]<div[p-1][[1]] && div[p-1][[1]]<div[p][[1]])
                     || (div[p-2][[1]]>div[p-1][[1]] && div[p-1][[1]]<div[p][[1]]) || ((1+k)*lsig>=lmacd && (1-k)*lsig<=lmacd))
-                && lmacd>0 && adx>=25 && change15>change)){# && low<=bol[[1]]){
+                && lmacd>0 && adx>=adx && change15>change)){# && low<=bol[[1]]){
                 cond <- ''
                 if (div[p-3][[1]]>div[p-2][[1]] && div[p-2][[1]]<div[p-1][[1]] && div[p-1][[1]]<div[p][[1]]) cond <- paste(cond,'two risen divs,')
                 if (div[p-2][[1]]>div[p-1][[1]] && div[p-1][[1]]<div[p][[1]])
                     cond <- paste(cond,'hole divs,')
                 if ((1+k)*lsig>=lmacd && (1-k)*lsig<=lmacd) cond <- paste(cond,'macd crossed signal,')
 
-                print(paste('Plotting',n,'because of',cond,'adx=',round(adx),'atr=',round(atr),'rsi14(30long/70short)=',round(rsi),'change,% 1w/3w/3m=',signif(change5,2),'/',signif(change15,2),'/',signif(change50,2)))
+                print(paste('Plotting',n,'because of',cond,'adx=',round(adx),'atr=',signif(atr,2),'rsi14(30long/70short)=',round(rsi),'change,% 1w/3w/3m=',signif(change5,2),'/',signif(change15,2),'/',signif(change50,2)))
                 if (web==TRUE)
                     browseURL(paste('https://finance.yahoo.com/calendar/earnings?day=',format(Sys.Date(),'%Y-%m-%d'),'&symbol=',n,sep=''))
                 print(tail(obj))
@@ -101,6 +105,20 @@ analyse <- function(lst=ftse250,quotes=TRUE,web=FALSE,change=5){
                 invisible(readline(prompt="Press [enter] to continue"))
             }})}}
 
-ticker <- function(min=10){
-    while (T) {print(format(Sys.time(),'%H:%M')); print(getQuote(shortlst[1])); Sys.sleep(60*min)}
+ticker <- function(n='FXPO.L',min=10){
+    while (T) {
+        print(format(Sys.time(),'%H:%M'))
+        obj <- getSymbols(n,src='google',env=NULL)
+        obj <- na.omit(obj)
+        obj <- updQuote(obj,n)
+        #print(getQuote(n))
+        if (n %in% shortlst){
+            no <- which(shortlst == n)
+            cls <- getQuote(n)[[2]]
+            balance <- stocks[no]/100*cls-tax[no]-stocks[no]/100*long[no]
+            print(paste('Balance=',signif(balance,3)))
+        }
+        chartSeries(obj,subset='last 2 months',TA=c(addSMA(),addEMA(30),addBBands(),addMACD(),addVo()),multi.col=FALSE,name=n,log.scale=T)
+        plot(addLines(h=lim[no],col='red'))
+        Sys.sleep(60*min)}
     }
