@@ -6,7 +6,7 @@ ftse250 <- c('3IN.L','AA.L','ASL.L','ACA.L','AGK.L','ALD.L','ATST.L','AMFW.L','A
 
 #####################################################################
 #####################################################################
-shortlst <- c('FXPO.L','KAZ.L','WIZZ.L','EMG.L','ECM.L','BOY.L')
+shortlst <- c('FXPO.L','KAZ.L','WIZZ.L','EMG.L','ECM.L','BOY.L','IGG.L')
 lim <- c(280.7,0,0,0,0) # Stop-loss limit
 stocks <- c(350,0,0,0,0,0) # No of stocks
 tax <- c((10.5+4.96),0,0,0,0,0) # Taxes
@@ -106,19 +106,19 @@ analyse <- function(lst=ftse250,quotes=TRUE,web=FALSE,change=5,adx=25){
             }})}}
 
 ticker <- function(n='FXPO.L',min=10){
+    obj <- getSymbols(n,src='google',env=NULL)
+    obj <- na.omit(obj)
     while (T) {
-        print(format(Sys.time(),'%H:%M'))
-        obj <- getSymbols(n,src='google',env=NULL)
-        obj <- na.omit(obj)
         obj <- updQuote(obj,n)
         #print(getQuote(n))
         if (n %in% shortlst){
             no <- which(shortlst == n)
             cls <- getQuote(n)[[2]]
+            tm <- getQuote(n)[[1]]
             balance <- stocks[no]/100*cls-tax[no]-stocks[no]/100*long[no]
-            print(paste('Balance=',signif(balance,3)))
+            print(paste(format(Sys.time(),'%H:%M'),'Balance=',signif(balance,3),'Last=',cls,'(',tm,')'))
         }
         chartSeries(obj,subset='last 2 months',TA=c(addSMA(),addEMA(30),addBBands(),addMACD(),addVo()),multi.col=FALSE,name=n,log.scale=T)
         plot(addLines(h=lim[no],col='red'))
         Sys.sleep(60*min)}
-    }
+}
