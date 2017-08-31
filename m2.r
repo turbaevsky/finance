@@ -6,8 +6,9 @@ ftse250 <- c('3IN.L','AA.L','ASL.L','ACA.L','AGK.L','ALD.L','ATST.L','AMFW.L','A
 
 #####################################################################
 #####################################################################
-shortlst <- c('FXPO.L','KAZ.L','WIZZ.L','EMG.L','ECM.L','BOY.L','IGG.L')
-lim <- c(280.7,0,0,0,0) # Stop-loss limit
+shortlst <- c('FXPO.L','KAZ.L','WIZZ.L')
+excluded <- c('GNC.L','IWG.L')
+lim <- c(282.4,0,0,0,0) # Stop-loss limit
 stocks <- c(350,0,0,0,0,0) # No of stocks
 tax <- c((10.5+4.96),0,0,0,0,0) # Taxes
 long <- c(280.44,0,0,0,0,0) # Buying price
@@ -33,6 +34,7 @@ updQuote <- function(obj,n) #Update price table by actual quotes
 #####################################################################
 analyse <- function(lst=ftse250,quotes=TRUE,web=FALSE,change=5,adx=25){
     for (n in lst) {
+        if (!n %in% excluded) {
         try({
             print(paste('Getting',n))
             obj <- getSymbols(n,src='google',env=NULL)
@@ -103,7 +105,7 @@ analyse <- function(lst=ftse250,quotes=TRUE,web=FALSE,change=5,adx=25){
                 chartSeries(obj,subset='last 3 months',TA=c(addSMA(),addEMA(30),addBBands(),addMACD(),addVo()),multi.col=FALSE,name=n,log.scale=T)
                 plot(addLines(h=lim[no],col='red'))
                 invisible(readline(prompt="Press [enter] to continue"))
-            }})}}
+            }})}}}
 
 ticker <- function(n='FXPO.L',min=10){
     obj <- getSymbols(n,src='google',env=NULL)
