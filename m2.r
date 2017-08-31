@@ -17,7 +17,8 @@ long <- c(280.44,0,0,0,0,0) # Buying price
 #web <- TRUE
 #lst <- sp500
                                         #lst <- ftse250
-
+#####################################################################
+### Functions ###
 #####################################################################
 updQuote <- function(obj,n) #Update price table by actual quotes
 {
@@ -30,6 +31,25 @@ updQuote <- function(obj,n) #Update price table by actual quotes
     obj <- rbind(obj,q)
     obj <- obj[!duplicated(index(obj),fromLast = TRUE ),]
     return(obj)
+}
+
+dT <- function(d) {return(as.Date(d,'%d-%b-%y'))}
+longDate <- function(d) {return(as.Date(as.character(d),'%b %d, %Y'))}
+
+#' Data convertor from finantial time
+toXTS <- function(data){
+    d <- cbind(as.Date(apply(data[1],2,longDate)),data[2])
+    return(xts(d[,-1], order.by=d[,1]))
+}
+
+#' Quote update
+upd <- function(){
+    d <- 'GB00B886CK92.L'
+    b <- 'GB00B8QYPR36.L'
+    uk <- '^UK50'
+    print(getQuote(d))
+    print(getQuote(b))
+    print(getQuote(uk))
 }
 #####################################################################
 analyse <- function(lst=ftse250,quotes=TRUE,web=FALSE,change=5,adx=25){
@@ -123,4 +143,22 @@ ticker <- function(n='FXPO.L',min=10){
         chartSeries(obj,subset='last 2 months',TA=c(addSMA(),addEMA(30),addBBands(),addMACD(),addVo()),multi.col=FALSE,name=n,log.scale=T)
         plot(addLines(h=lim[no],col='red'))
         Sys.sleep(60*min)}
+}
+##############################################################################
+### Funds charting using csv ###
+#############################################################################
+
+stat <- function(data='~/Desktop/b886ck92.csv',series='S',subset='last 6 months'){
+# '~/Desktop/b8qypr36.csv
+    ck92 <- read.csv(data)
+    ck <- toXTS(ck92)
+    if (series=='S'){
+        chartSeries(ck,subset=subset,TA=c(addSMA(),addEMA(30),addSMA(200),addMACD()))
+        #addMACD()
+        #addEMA()
+        #addCCI()
+        #addRSI()
+        }
+    else if (series=='w') barplot(weeklyReturn(ck))
+    else if (series=='m') barplot(monthlyReturn(ck))
 }
