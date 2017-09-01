@@ -8,7 +8,7 @@ ftse250 <- c('3IN.L','AA.L','ASL.L','ACA.L','AGK.L','ALD.L','ATST.L','AMFW.L','A
 #####################################################################
 shortlst <- c('FXPO.L','KAZ.L','WIZZ.L')
 excluded <- c('GNC.L','IWG.L')
-lim <- c(282.4,0,0,0,0) # Stop-loss limit
+lim <- c(286.1,0,0,0,0) # Stop-loss limit
 stocks <- c(350,0,0,0,0,0) # No of stocks
 tax <- c((10.5+4.96),0,0,0,0,0) # Taxes
 long <- c(280.44,0,0,0,0,0) # Buying price
@@ -97,7 +97,8 @@ analyse <- function(lst=ftse250,quotes=TRUE,web=FALSE,change=5,adx=25){
             if (n %in% shortlst || (avgV>=1e5 && cls>sma200 && cls>=5 &&
                 ((div[p-3][[1]]>div[p-2][[1]] && div[p-2][[1]]<div[p-1][[1]] && div[p-1][[1]]<div[p][[1]])
                     || (div[p-2][[1]]>div[p-1][[1]] && div[p-1][[1]]<div[p][[1]]) || ((1+k)*lsig>=lmacd && (1-k)*lsig<=lmacd))
-                && lmacd>0 && adx>=adx && change15>change)){# && low<=bol[[1]]){
+                && adx>=adx && change15>change)){# && low<=bol[[1]]){
+### Add SMI cross criteria AND lmacd>(<)0 removed ##########################
                 cond <- ''
                 if (div[p-3][[1]]>div[p-2][[1]] && div[p-2][[1]]<div[p-1][[1]] && div[p-1][[1]]<div[p][[1]]) cond <- paste(cond,'two risen divs,')
                 if (div[p-2][[1]]>div[p-1][[1]] && div[p-1][[1]]<div[p][[1]])
