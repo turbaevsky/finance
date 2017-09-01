@@ -35,6 +35,7 @@ updQuote <- function(obj,n) #Update price table by actual quotes
     row.names(q)<- trunc(q[,"Trade Time"], units="days")
     q <- q[,c("Open","High","Low","Last","Volume")]
     names(q) <- c("Open","High","Low","Close","Volume")
+    q$Close <- as.numeric(gQuote(n)$l)
     ################### Insert google quotes (gQuote) ################
     q <- xts(q,d)
     obj <- rbind(obj,q)
