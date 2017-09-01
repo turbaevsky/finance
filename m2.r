@@ -26,7 +26,7 @@ gQuote <- function(n='FXPO.L'){ # get quotes from google (real-time)
     url <- paste('http://finance.google.com/finance/info?client=ig&q=',n,sep='')
     data <- getURL(url)
     json <- fromJSON(gsub('\n|[//]|[\\]','',data))
-    return(paste(json$lt,json$l))
+    return(json)
 }
 updQuote <- function(obj,n) #Update price table by actual quotes
 {
@@ -149,7 +149,7 @@ ticker <- function(n='FXPO.L',min=10,subset='last 3 months'){
             tm <- getQuote(n)[[1]]
             balance <- stocks[no]/100*cls-tax[no]-stocks[no]/100*long[no]
             #print(paste(format(Sys.time(),'%H:%M'),'Balance=',signif(balance,3),'Last=',cls,'(',tm,')'))
-            print(gQuote(n))
+            print(paste(gQuote(n)$lt,gQuote(n)$l))
         }
         chartSeries(obj,subset=subset,TA=c(addSMA(),addEMA(30),addBBands(),addMACD(),addVo()),multi.col=FALSE,name=n,log.scale=T)
         plot(addLines(h=lim[no],col='red'))
