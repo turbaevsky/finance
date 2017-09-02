@@ -174,7 +174,6 @@ ticker <- function(n='FXPO.L',min=10,subset='last 3 months'){
 ##############################################################################
 ### Funds charting using csv ###
 ##############################################################################
-
 stat <- function(data='~/Desktop/b886ck92.csv',series='S',subset='last 6 months'){
 # '~/Desktop/b8qypr36.csv
     ck92 <- read.csv(data)
@@ -188,4 +187,44 @@ stat <- function(data='~/Desktop/b886ck92.csv',series='S',subset='last 6 months'
         }
     else if (series=='w') barplot(weeklyReturn(ck))
     else if (series=='m') barplot(monthlyReturn(ck))
+}
+##############################################################################
+dayTicker <- function(name='FXPO.L',min=5,imitate=F){
+    f <- data.frame()
+    while (TRUE){
+        for (t in 1:min){
+            j <- gQuote(name)
+            if (imitate){
+                dt <- Sys.time()
+                val <- runif(1,200,400)
+                }
+            else {
+                dt <- strptime(j$lt,"%b %d, %I:%M%p")
+                val <- as.numeric(j$l)
+                }
+            if (t==1) {
+                price <- data.frame(dt,val,val,val,val)
+                names(price) <- c('Date','Open','High','Low','Close')
+                        }
+            else if (t==min) price$Close <- val
+            if (val>price$High) price$High <- val
+            if (val<price$Low) price$Low <- val
+            if (imitate) Sys.sleep(1)
+            else Sys.sleep(30)
+            }
+        f <- rbind(f,price)
+        #print(f)
+        x <- xts(f[2:5],f$Date)
+        print(nrow(x))
+        if (nrow(x)>2 && nrow(x)<=10) chartSeries(x)
+        else if (nrow(x)>10 && nrow(x)<=30) chartSeries(x,TA=c(addSMA()))
+        else if (nrow(x)>30) chartSeries(x,TA=c(addSMA(),addEMA(30),addSSTO()))
+    }
+##############################################################################
+    
+        
+    
+
+
+
 }
