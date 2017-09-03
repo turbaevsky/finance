@@ -213,7 +213,7 @@ dayTicker <- function(name='FXPO.L',min=5,imitate=F){
             if (val>price$High) price$High <- val
             if (val<price$Low) price$Low <- val
             if (imitate) Sys.sleep(1)
-            else Sys.sleep(30)
+            else Sys.sleep(60)
             }
         f <- rbind(f,price)
         #print(f)
