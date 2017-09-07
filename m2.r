@@ -30,18 +30,21 @@ gQuote <- function(n='FXPO.L'){ # get quotes from google (real-time)
     return(json)
 }
 #####################################################################
-updQuote <- function(obj,n) #Update price table by actual quotes
+updQuote <- function(obj,n,google=FALSE) #Update price table by actual quotes
 {
     q <- getQuote(n)
     d <- Sys.Date()
     row.names(q)<- trunc(q[,"Trade Time"], units="days")
     q <- q[,c("Open","High","Low","Last","Volume")]
     names(q) <- c("Open","High","Low","Close","Volume")
-    cls <- as.numeric(gQuote(n)$l)
-    q$Close <- cls
-    if (q$High<cls) q$High <- cls
-    if (q$Low>cls) q$Low <- cls
-    ################### Insert google quotes (gQuote) ###############
+################### Insert google quotes (gQuote) ###############
+    if (google){
+        cls <- as.numeric(gQuote(n)$l)
+        q$Close <- cls
+        if (q$High<cls) q$High <- cls
+        if (q$Low>cls) q$Low <- cls
+        }  
+##################################################    
     q <- xts(q,d)
     obj <- rbind(obj,q)
     obj <- obj[!duplicated(index(obj),fromLast = TRUE ),]
@@ -68,17 +71,16 @@ upd <- function(){
 }
 #####################################################################
 #####################################################################
-analyse <- function(lst=ftas,quotes=TRUE,web=FALSE,change=5,adx=25,k=0.05,ssto=0.9){
+analyse <- function(lst=ftas,quotes=TRUE,web=FALSE,change=5,adx=25,k=0.05,ssto=0.9,google=FALSE,src='yahoo'){
 # change = price change for 3 weeks in percent, adx = ADX low limit, k = koeff. for MACD and SSTO crossing
 # ssto - SSTO D% high limit 
     for (n in lst) {
         if (!n %in% excluded) {
         try({
-            print(paste('Getting',n))
-            obj <- getSymbols(n,src='google',env=NULL)
+            print(paste('Getting',n,'from',src))
+            obj <- getSymbols(n,src=src,env=NULL)
             obj <- na.omit(obj)
-            if (quotes) obj <- updQuote(obj,n)
-
+            if (quotes) obj <- updQuote(obj,n,google=google) 
             adx <- last(ADX(obj[,c(2,3,4)]))$ADX[[1]]
             macd <- MACD(obj[,4],12,26,9,maType='EMA')
             lmacd <- last(macd)$macd[[1]]
