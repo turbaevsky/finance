@@ -33,7 +33,9 @@ gQuote <- function(n='FXPO.L'){ # get quotes from google (real-time)
 updQuote <- function(obj,n,google=FALSE) #Update price table by actual quotes
 {
     q <- getQuote(n)
-    d <- Sys.Date()
+    #print(q)
+    #q <- na.fill(q)
+    d <- as.Date(q[[1]])
     row.names(q)<- trunc(q[,"Trade Time"], units="days")
     q <- q[,c("Open","High","Low","Last","Volume")]
     names(q) <- c("Open","High","Low","Close","Volume")
@@ -46,8 +48,11 @@ updQuote <- function(obj,n,google=FALSE) #Update price table by actual quotes
         }  
 ##################################################    
     q <- xts(q,d)
-    obj <- rbind(obj,q)
+    #print(q)
+    #print(tail(obj[,1:5]))
+    obj <- rbind(obj[,1:5],q)
     obj <- obj[!duplicated(index(obj),fromLast = TRUE ),]
+    #print(tail(obj))
     return(obj)
 }
 #####################################################################
@@ -80,7 +85,9 @@ analyse <- function(lst=ftas,quotes=TRUE,web=FALSE,change=5,adx=25,k=0.05,ssto=0
             print(paste('Getting',n,'from',src))
             obj <- getSymbols(n,src=src,env=NULL)
             obj <- na.omit(obj)
-            if (quotes) obj <- updQuote(obj,n,google=google) 
+            
+            if (quotes) obj <- na.omit(updQuote(obj,n,google=google))
+            #print(tail(obj))
             adx <- last(ADX(obj[,c(2,3,4)]))$ADX[[1]]
             macd <- MACD(obj[,4],12,26,9,maType='EMA')
             lmacd <- last(macd)$macd[[1]]
