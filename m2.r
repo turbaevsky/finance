@@ -1,6 +1,10 @@
 library(quantmod)
 library(RCurl)
 library(jsonlite)
+library(telegram)
+
+bot <- TGBot$new(token = '183104961:AAFOVTLmfQ0MDHdt2ZnLgtUZYkM_gbDFkLs')
+bot$set_default_chat_id(181982455)
 
 sp500 <- c('MMM','ABT','ABBV','ACN','ATVI','AYI','ADBE','AMD','AAP','AES','AET','AMG','AFL','A','APD','AKAM','ALK','ALB','ARE','ALXN','ALGN','ALLE','AGN','ADS','LNT','ALL','GOOGL','GOOG','MO','AMZN','AEE','AAL','AEP','AXP','AIG','AMT','AWK','AMP','ABC','AME','AMGN','APH','APC','ADI','ANDV','ANSS','ANTM','AON','AOS','APA','AIV','AAPL','AMAT','ADM','ARNC','AJG','AIZ','T','ADSK','ADP','AZO','AVB','AVY','BHGE','BLL','BAC','BK','BCR','BAX','BBT','BDX','BRK.B','BBY','BIIB','BLK','HRB','BA','BWA','BXP','BSX','BHF','BMY','AVGO','BF.B','CHRW','CA','COG','CPB','COF','CAH','CBOE','KMX','CCL','CAT','CBG','CBS','CELG','CNC','CNP','CTL','CERN','CF','SCHW','CHTR','CHK','CVX','CMG','CB','CHD','CI','XEC','CINF','CTAS','CSCO','C','CFG','CTXS','CLX','CME','CMS','COH','KO','CTSH','CL','CMCSA','CMA','CAG','CXO','COP','ED','STZ','COO','GLW','COST','COTY','CCI','CSRA','CSX','CMI','CVS','DHI','DHR','DRI','DVA','DE','DLPH','DAL','XRAY','DVN','DLR','DFS','DISCA','DISCK','DISH','DG','DLTR','D','DOV','DOW','DPS','DTE','DRE','DD','DUK','DXC','ETFC','EMN','ETN','EBAY','ECL','EIX','EW','EA','EMR','ETR','EVHC','EOG','EQT','EFX','EQIX','EQR','ESS','EL','ES','RE','EXC','EXPE','EXPD','ESRX','EXR','XOM','FFIV','FB','FAST','FRT','FDX','FIS','FITB','FE','FISV','FLIR','FLS','FLR','FMC','FL','F','FTV','FBHS','BEN','FCX','GPS','GRMN','IT','GD','GE','GGP','GIS','GM','GPC','GILD','GPN','GS','GT','GWW','HAL','HBI','HOG','HRS','HIG','HAS','HCA','HCP','HP','HSIC','HSY','HES','HPE','HLT','HOLX','HD','HON','HRL','HST','HPQ','HUM','HBAN','IDXX','INFO','ITW','ILMN','IR','INTC','ICE','IBM','INCY','IP','IPG','IFF','INTU','ISRG','IVZ','IRM','JEC','JBHT','SJM','JNJ','JCI','JPM','JNPR','KSU','K','KEY','KMB','KIM','KMI','KLAC','KSS','KHC','KR','LB','LLL','LH','LRCX','LEG','LEN','LVLT','LUK','LLY','LNC','LKQ','LMT','L','LOW','LYB','MTB','MAC','M','MRO','MPC','MAR','MMC','MLM','MAS','MA','MAT','MKC','MCD','MCK','MDT','MRK','MET','MTD','MGM','KORS','MCHP','MU','MSFT','MAA','MHK','TAP','MDLZ','MON','MNST','MCO','MS','MOS','MSI','MYL','NDAQ','NOV','NAVI','NTAP','NFLX','NWL','NFX','NEM','NWSA','NWS','NEE','NLSN','NKE','NI','NBL','JWN','NSC','NTRS','NOC','NRG','NUE','NVDA','ORLY','OXY','OMC','OKE','ORCL','PCAR','PKG','PH','PDCO','PAYX','PYPL','PNR','PBCT','PEP','PKI','PRGO','PFE','PCG','PM','PSX','PNW','PXD','PNC','RL','PPG','PPL','PX','PCLN','PFG','PG','PGR','PLD','PRU','PEG','PSA','PHM','PVH','QRVO','PWR','QCOM','DGX','RRC','RJF','RTN','O','RHT','REG','REGN','RF','RSG','RMD','RHI','ROK','COL','ROP','ROST','RCL','CRM','SCG','SLB','SNI','STX','SEE','SRE','SHW','SIG','SPG','SWKS','SLG','SNA','SO','LUV','SPGI','SWK','SPLS','SBUX','STT','SRCL','SYK','STI','SYMC','SYF','SNPS','SYY','TROW','TGT','TEL','FTI','TXN','TXT','TMO','TIF','TWX','TJX','TMK','TSS','TSCO','TDG','TRV','TRIP','FOXA','FOX','TSN','UDR','ULTA','USB','UA','UAA','UNP','UAL','UNH','UPS','URI','UTX','UHS','UNM','VFC','VLO','VAR','VTR','VRSN','VRSK','VZ','VRTX','VIAB','V','VNO','VMC','WMT','WBA','DIS','WM','WAT','WEC','WFC','HCN','WDC','WU','WRK','WY','WHR','WFM','WMB','WLTW','WYN','WYNN','XEL','XRX','XLNX','XL','XYL','YUM','ZBH','ZION','ZTS')
 ftse250 <- c('3IN.L','AA.L','ASL.L','ACA.L','AGK.L','ALD.L','ATST.L','AMFW.L','ASCL.L','ASHM.L','AGR.L','AUTO.L','AVV.L','BME.L','BBY.L','BNKR.L','BAG.L','BBA.L','BEZ.L','BWY.L','BRSN.L','BKG.L','BGEO.L','BYG.L','BOY.L','BOK.L','BVS.L','BTEM.L','BRW.L','BVIC.L','BWNG.L','BTG.L','CNE.L','CLDN.L','CAPC.L','CPI.L','CARD.L','CLLN.L','CEY.L','CINE.L','CTY.L','CKN.L','CBG.L','CLI.L','COA.L','COB.L','CCC.L','CSP.L','CWK.L','CRST.L','CYBG.L','DJAN.L','DCG.L','DPH.L','DLN.L','DTY.L','DPLM.L','DC.L','DOM.L','DRX.L','DNLM.L','EDIN.L','ELTA.L','ECM.L','ELM.L','ETO.L','ESNT.L','ESUR.L','ERM.L','EVR.L','FCPT.L','FDM.L','FXPO.L','FEV.L','FCSS.L','FDSA.L','FGT.L','FGP.L','FSJ.L','FRCL.L','GFRD.L','GCP.L','GSS.L','GNS.L','GOG.L','GPOR.L','GFTU.L','GRI.L','UKW.L','GNC.L','GNK.L','GRG.L','GVC.L','HFD.L','HLMA.L','HSTN.L','HVPE.L','HSTG.L','HAS.L','HICL.L','HIK.L','HILS.L','HSX.L','HOC.L','HSV.L','HWDN.L','HTG.L','IBST.L','IGG.L','IMI.L','INCH.L','INDV.L','ISAT.L','ICP.L','INPP.L','INTU.L','INVP.L','IPO.L','IWG.L','JLT.L','JD.L','CHOO.L','JLG.L','JLIF.L','JII.L','JAM.L','JMG.L','JUP.L','JE.L','JUST.L','KAZ.L','KWE.L','KIE.L','LCL.L','LRE.L','LMP.L','EMG.L','MSLH.L','MARS.L','MCS.L','MGGT.L','MRO.L','MRC.L','MTRO.L','MLC.L','MAB.L','MTO.L','MONY.L','MNKS.L','MGAM.L','MYI.L','NEX.L','NBLS.L','NRR.L','NXG.L','NMC.L','NTG.L','NOG.L','OCDO.L','OSB.L','P2P.L','PAGE.L','PAG.L','PAY.L','PAYS.L','PNN.L','PLI.L','PSH.L','PNL.L','PDL.L','PFC.L','PETS.L','PHNX.L','PTEC.L','PCT.L','POLY.L','PLP.L','PZC.L','QQ.L','RNK.L','RAT.L','RDI.L','RDW.L','TRIG.L','RSW.L','RTN.L','RMV.L','RCP.L','RSE.L','ROR.L','RPC.L','SAFE.L','SAGA.L','SNN.L','SVS.L','SCIN.L','SNR.L','SRP.L','SHB.L','SHI.L','SXX.L','SMDS.L','SCT.L','SOPH.L','SXS.L','SPX.L','SPI.L','SPD.L','SSPG.L','SMP.L','SGC.L','STOB.L','SGP.L','SYNC.L','SYNT.L','TALK.L','TATE.L','TBCG.L','TED.L','TEP.L','TMPL.L','TEM.L','TCG.L','TCAP.L','TRY.L','TPK.L','BBOX.L','TLW.L','UBM.L','UDG.L','UKCM.L','ULE.L','UTG.L','VEC.L','VED.L','VSVS.L','VCT.L','VEIL.L','VM.L','WEIR.L','JDW.L','SMWH.L','WMH.L','WTAN.L','WIZZ.L','WG.L','WPCT.L','WKP.L','WWH.L','ZPG.L')
@@ -76,7 +80,8 @@ upd <- function(){
 }
 #####################################################################
 #####################################################################
-analyse <- function(lst=ftas,quotes=TRUE,web=FALSE,change=5,adx=25,k=0.05,ssto=0.9,google=FALSE,src='yahoo'){
+analyse <- function(lst=ftas,quotes=TRUE,web=FALSE,change=5,adx=25,k=0.05,ssto=0.9,
+google=FALSE,src='yahoo',telegram=FALSE){
 # change = price change for 3 weeks in percent, adx = ADX low limit, k = koeff. for MACD and SSTO crossing
 # ssto - SSTO D% high limit 
     for (n in lst) {
@@ -123,11 +128,12 @@ analyse <- function(lst=ftas,quotes=TRUE,web=FALSE,change=5,adx=25,k=0.05,ssto=0
 ############################################################################
 ### IF module ###
 ############################################################################
-            if ((n %in% shortlst) || ((avgV>=1e5 && cls>sma200 && cls>=5    
-		&& adx>=adx && change15>change) &&
-		(((1+k)*lsig>=lmacd && (1-k)*lsig<=lmacd)
-		|| ((1+k)*st[[2]]>=st[[3]] && (1-k)*st[[2]]<=st[[3]] && st[[2]]<=ssto)
-                ))){
+            if ((n %in% shortlst) || 
+                ((avgV>=1e5 && cls>sma200 && cls>=5    
+		        && adx>=adx && change15>change) &&
+		        #(((1+k)*lsig>=lmacd && (1-k)*lsig<=lmacd) ||
+		        ((1+k)*st[[2]]>=st[[3]] && (1-k)*st[[2]]<=st[[3]] && st[[2]]<=ssto)
+                )){
 ############################################################################
                 cond <- ''
                 if (div[p-3][[1]]>div[p-2][[1]] && div[p-2][[1]]<div[p-1][[1]] && div[p-1][[1]]<div[p][[1]]) cond <- paste(cond,'two risen divs,')
@@ -137,10 +143,11 @@ analyse <- function(lst=ftas,quotes=TRUE,web=FALSE,change=5,adx=25,k=0.05,ssto=0
                 if ((1+k)*st[[2]]>=st[[3]] && (1-k)*st[[2]]<=st[[3]]) cond <- paste(cond,'SSTO crossed')
 
                 print(paste('Plotting',n,'because of',cond))
-                print(paste('adx=',round(adx),'atr=',signif(atr,2),'rsi14(30long/70short)=',round(rsi),'change,% 1w/3w/3m=',signif(change5,2),'/',signif(change15,2),'/',signif(change50,2),',SSTO:fastD=',signif(st$fastD,3),'slowD=',signif(st$slowD,3)))
+                msg <- paste('adx=',round(adx),'atr=',signif(atr,2),'rsi14(30long/70short)=',round(rsi),'change,% 1w/3w/3m=',signif(change5,2),'/',signif(change15,2),'/',signif(change50,2),',SSTO:fastD=',signif(st$fastD,3),'slowD=',signif(st$slowD,3))
+                print(msg)
                 if (web==TRUE)
                     browseURL(paste('https://finance.yahoo.com/calendar/earnings?day=',format(Sys.Date(),'%Y-%m-%d'),'&symbol=',n,sep=''))
-                print(tail(obj))
+                print(tail(obj[,1:5]))
                 print(tail(merge(div,macd)))
                 if (quotes) try(print(getOptionChain(n)))
                 if (n %in% shortlst){
@@ -151,31 +158,42 @@ analyse <- function(lst=ftas,quotes=TRUE,web=FALSE,change=5,adx=25,k=0.05,ssto=0
                 no <- which(shortlst == n)
 # Chart ##
 # MACD could be (5,34,5) to see Elliot's wave
-
+                if (!telegram){
                 chartSeries(obj,subset='last 9 months',TA=c(addSMA(200),addMACD(),addSMA(),addEMA(30),addVo()),multi.col=FALSE,name=n,log.scale=T)
                 plot(addLines(h=lim[no],col='red'))
                 invisible(readline(prompt="Press [enter] to continue"))
+                }
+
+                if (telegram) png('test.png')
                 chartSeries(obj,subset='last 3 months',TA=c(addSMA(),addEMA(30),addBBands(),addMACD(),addVo()),multi.col=FALSE,name=n,log.scale=T)
                 #plot(addTA(stoch(HLC(obj))),col=c('red','blue','green'))
                 plot(addSSTO())
                 plot(addLines(h=lim[no],col='red'))
-                invisible(readline(prompt="Press [enter] to continue"))
+                if (telegram) {
+                    dev.off()
+                    bot$sendPhoto('test.png', caption=paste(n,cond,msg))
+                         }
+                if (!telegram) invisible(readline(prompt="Press [enter] to continue"))
             }})}}}
 ##############################################################################
-ticker <- function(n='FXPO.L',min=10,subset='last 3 months'){
-    obj <- getSymbols(n,src='google',env=NULL)
+ticker <- function(n='FXPO.L',min=10,subset='last 3 months',src='google',
+telegram=FALSE,google=FALSE){
+    obj <- getSymbols(n,src=src,env=NULL)
     obj <- na.omit(obj)
+    q <- getQuote(n)
     while (T) {
-        obj <- updQuote(obj,n)
+        obj <- updQuote(obj,n,google=google)
         st <- last(stoch(HLC(obj))) # low stochastic, %K, %D and lowD
         #print(getQuote(n))
         if (n %in% shortlst){
             no <- which(shortlst == n)
-            cls <- getQuote(n)[[2]]
-            tm <- getQuote(n)[[1]]
+            cls <- q[[2]]
+            tm <- q[[1]]
             balance <- stocks[no]/100*cls-tax[no]-stocks[no]/100*long[no]
             #print(paste(format(Sys.time(),'%H:%M'),'Balance=',signif(balance,3),'Last=',cls,'(',tm,')'))
-            print(paste(gQuote(n)$lt,gQuote(n)$l,'SSTO fastD=',signif(st$fastD,3),'slowD=',signif(st$slowD,3)))
+            msg <- paste(gQuote(n)$lt,gQuote(n)$l,'SSTO fastD=',signif(st$fastD,3),'slowD=',signif(st$slowD,3))
+            if (telegram) bot$sendMessage(msg)
+            else print(msg)
         }
         chartSeries(obj,subset=subset,TA=c(addSMA(),addEMA(30),addBBands(),addMACD(),addVo()),multi.col=FALSE,name=n,log.scale=T)
         plot(addLines(h=lim[no],col='red'))
@@ -200,18 +218,23 @@ stat <- function(data='~/Desktop/b886ck92.csv',series='S',subset='last 6 months'
     else if (series=='m') barplot(monthlyReturn(ck))
 }
 ##############################################################################
-dayTicker <- function(name='FXPO.L',min=5,imitate=F){
+dayTicker <- function(name='FXPO.L',min=5,imitate=FALSE,google=FALSE){
     f <- data.frame()
     while (TRUE){
         for (t in 1:min){
-            j <- gQuote(name)
+            if (google){
+                j <- gQuote(name)
+                dt <- strptime(j$lt,"%b %d, %I:%M%p")
+                val <- as.numeric(j$l)
+                        }
+            else {
+                j <- getQuote(n)
+                dt <- j$Trade
+                val <- j$Last
+                  }
             if (imitate){
                 dt <- Sys.time()
                 val <- runif(1,200,400)
-                }
-            else {
-                dt <- strptime(j$lt,"%b %d, %I:%M%p")
-                val <- as.numeric(j$l)
                 }
             if (t==1) {
                 price <- data.frame(dt,val,val,val,val)
