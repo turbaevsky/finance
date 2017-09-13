@@ -13,10 +13,10 @@ ftas <- c('III.L','3IN.L','FOUR.L','AA.L','AAIF.L','AAS.L','ADIG.L','ABD.L','ANI
 #####################################################################
 shortlst <- c('FXPO.L','KAZ.L','WIZZ.L')
 excluded <- c('GNC.L','IWG.L')
-lim <- c(323.2-7.8*2,0,0,0,0) # Stop-loss limit
-stocks <- c(935,0,0,0,0,0) # No of stocks
-tax <- c(25.55+10.5,0,0,0,0,0) # Taxes
-long <- c(320.8,0,0,0,0,0) # Buying price
+lim <- c(323.2-7.8*2,795-40,0,0,0) # Stop-loss limit
+stocks <- c(935,240,0,0,0,0) # No of stocks
+tax <- c(25.55+10.5,10.5*2+9.59,0,0,0,0) # Taxes
+long <- c(320.8,795,0,0,0,0) # Buying price
 #lst <- shortlst
 #quotes <- TRUE
 #web <- TRUE
@@ -80,7 +80,7 @@ upd <- function(){
 }
 #####################################################################
 #####################################################################
-analyse <- function(lst=ftas,quotes=TRUE,web=FALSE,change=5,adx=25,k=0.05,ssto=0.9,google=FALSE,src='yahoo',telegram=FALSE,long=TRUE){
+analyse <- function(lst=ftas,quotes=TRUE,web=FALSE,change=5,adx=25,k=0.05,ssto=0.9,google=FALSE,src='google',telegram=FALSE,long=TRUE){
 # change = price change for 3 weeks in percent, adx = ADX low limit, k = koeff. for MACD and SSTO crossing
 # ssto - SSTO D% high limit
     for (n in lst) {
@@ -175,29 +175,34 @@ analyse <- function(lst=ftas,quotes=TRUE,web=FALSE,change=5,adx=25,k=0.05,ssto=0
                 if (!telegram) invisible(readline(prompt="Press [enter] to continue"))
             }})}}}
 ##############################################################################
-ticker <- function(n='FXPO.L',min=10,subset='last 3 months',src='google',
-telegram=FALSE,google=FALSE){
-    obj <- getSymbols(n,src=src,env=NULL)
-    obj <- na.omit(obj)
-    q <- getQuote(n)
-    while (T) {
+ticker <- function(name='FXPO.L',min=10,subset='last 3 months',src='google',
+                   telegram=FALSE,google=FALSE,chart=FALSE){
+    while(TRUE){
+    for (n in name){
+        obj <- getSymbols(n,src=src,env=NULL)
+        obj <- na.omit(obj)
+        q <- getQuote(n)
         obj <- updQuote(obj,n,google=google)
         st <- last(stoch(HLC(obj))) # low stochastic, %K, %D and lowD
-        #print(getQuote(n))
+                                        #print(getQuote(n))
         if (n %in% shortlst){
             no <- which(shortlst == n)
             cls <- q[[2]]
             tm <- q[[1]]
             balance <- stocks[no]/100*cls-tax[no]-stocks[no]/100*long[no]
-            print(paste(format(Sys.time(),'%H:%M'),'Balance=',signif(balance,3),'Last=',cls,'(',tm,')'))
-            if (google) msg <- paste(gQuote(n)$lt,gQuote(n)$l,'SSTO fastD=',signif(st$fastD,3),'slowD=',signif(st$slowD,3))
-            if (telegram) bot$sendMessage(msg)
-            else if (google) print(msg)
+            msg1 <- paste(n,format(Sys.time(),'%H:%M'),'Bal=',signif(balance,3),'Last=',cls,'Limit=',lim[no],'(',tm,')')
+            if (google) msg <- paste(n,gQuote(n)$lt,gQuote(n)$l,'SSTO fastD=',signif(st$fastD,3),'slowD=',signif(st$slowD,3))
+            if (telegram) bot$sendMessage(msg1)
+            if (google) print(msg)
+            else print(msg1)
         }
-        chartSeries(obj,subset=subset,TA=c(addSMA(),addEMA(30),addBBands(),addMACD(),addVo()),multi.col=FALSE,name=n,log.scale=T)
-        plot(addLines(h=lim[no],col='red'))
-        plot(addSSTO())
-        Sys.sleep(60*min)}
+        if (chart){
+            chartSeries(obj,subset=subset,TA=c(addSMA(),addEMA(30),addBBands(),addMACD(),addVo()),multi.col=FALSE,name=n,log.scale=T)
+            plot(addLines(h=lim[no],col='red'))
+            plot(addSSTO())
+            }
+        Sys.sleep(60/length(name)*min)
+    }}
 }
 ##############################################################################
 ### Funds charting using csv ###
