@@ -1,5 +1,5 @@
 library(quantmod)
-#library(RCurl)
+library(RCurl)
 library(jsonlite)
 library(telegram)
 
@@ -136,9 +136,12 @@ analyse <- function(lst=ftas,quotes=TRUE,web=FALSE,change=5,adx=25,k=0.05,ssto=0
                 print(paste('Plotting',n,'because of',cond))
                 msg <- paste('adx=',round(adx),'atr=',signif(atr,2),'rsi14(30long/70short)=',round(rsi),'change,% 1w/3w/3m=',signif(change5,2),'/',signif(change15,2),'/',signif(change50,2),',SSTO:fastD=',signif(st$fastD,3),'slowD=',signif(st$slowD,3))
                 print(msg)
-                if (web==TRUE)
+                if (web==TRUE){
                     #browseURL(paste('https://finance.yahoo.com/calendar/earnings?day=',format(Sys.Date(),'%Y-%m-%d'),'&symbol=',n,sep=''))
-                    print(gQuote(n)$events)
+                    webinfo <- gQuote(paste('LON:',n,sep=''))
+                    print(paste(webinfo$name,':',webinfo$sname,':',webinfo$iname))
+                    print(webinfo$events)
+                    }
                 print(tail(obj[,1:5]))
                 print(tail(merge(div,macd)))
                 if (quotes) try(print(getOptionChain(n)))
