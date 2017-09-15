@@ -23,6 +23,40 @@ long <- j$long # Buying price
 #####################################################################
 ### Functions ###
 #####################################################################
+                                        # based on http://www.marketcalls.in/database/google-realtime-intraday-backfill-data.html and https://stackoverflow.com/questions/46070126/google-finance-json-stock-quote-stopped-working
+#q= stock symbol on Google finance
+#x= exchange symbol
+#i= interval (here 60 means 60 sec (1 minute interval))
+#p= no of period(here 5d denotes 5 days of data)
+#f= parameters (day, close, open, high and low)
+#df= difference (cpct is may be in % change )
+#auto =1,
+#ts = time start… if you cut the last 4 digits…the rest gives the start day in seconds
+
+u2time <- function(unixtime){
+    #print(unixtime)
+    return(as.character(as.POSIXct(unixtime, origin="1970-01-01")))
+}
+
+gData <- function(n='FXPO.L',period='15d',i=3600,data='d,o,h,l,c,v',starttime=Sys.time()){
+    starttime <- as.numeric(substr(as.character(as.numeric(starttime)),1,10))
+    url <- paste('https://finance.google.com/finance/getprices?q=',n,'&p=',period,'&f=',data,'&i=',i,'&ts=',starttime,sep='')
+    d <- read.table(url,sep=',',header=F,skip=7)
+    val <- as.numeric(substr(d[1,1],2,11))
+    t <- apply(d[1],2,function(x) val+as.numeric(x)*i)
+    t[1,1] <- val
+    d <- cbind(t,d[2:6])
+    t <- apply(d[1],2,u2time)
+    d <- cbind(t,d[2:6])
+    rownames(d) <- d[,1]
+    d <- d[2:6]
+    colnames(d) <- c('Close','High','Low','Open','Volume')
+    d <- as.xts(d)
+    return(d)
+    }
+
+
+#####################################################################
 addSSTO <- newTA(stoch,HLC,col=c(4,5,6),type=c('n','l','l'))
 #####################################################################
 gQuote <- function(n='LON:FXPO'){ # get quotes from google (real-time)
@@ -32,6 +66,13 @@ gQuote <- function(n='LON:FXPO'){ # get quotes from google (real-time)
     json <- fromJSON(gsub('\n|[//]|[\\]','',data))
     return(json)
 }
+
+
+gQuote2 <- function(n='FXPO.L'){
+    url <- paste('https://finance.google.com/finance/getprices?q=',n,'&p=3m&f=c&i=60',sep='')
+    d <- tail(read.table(url,sep=',',header=F,skip=7),1)[[1]]
+    return(d)
+    }
 #####################################################################
 updQuote <- function(obj,n,google=FALSE) #Update price table by actual quotes
 {
@@ -44,8 +85,9 @@ updQuote <- function(obj,n,google=FALSE) #Update price table by actual quotes
     names(q) <- c("Open","High","Low","Close","Volume")
 ################### Insert google quotes (gQuote) ###############
     if (google){
-        cls <- gQuote(paste('LON:',n,sep=''))
-        cls <- as.numeric(cls$l)
+        #cls <- gQuote(paste('LON:',n,sep=''))
+        #cls <- as.numeric(cls$l)
+        cls <- gQuote2(paste(n,'.L',sep=''))
         q$Close <- cls
         if (q$High<cls) q$High <- cls
         if (q$Low>cls) q$Low <- cls
@@ -172,36 +214,28 @@ analyse <- function(lst=ftas,quotes=TRUE,web=FALSE,change=5,adx=25,k=0.05,ssto=0
             }})}}}
 ##############################################################################
 ticker <- function(name='FXPO',min=10,subset='last 3 months',src='google',
-                   telegram=FALSE,google=FALSE,chart=FALSE){
+                   telegram=FALSE,chart=FALSE){
     while(TRUE){
-    for (n in name){
-        obj <- getSymbols(paste(n,'.L',sep=''),src=src,env=NULL)
-        obj <- na.omit(obj)
-        q <- getQuote(paste(n,'.L',sep=''))
-        obj <- updQuote(obj,n,google=google)
-        st <- last(stoch(HLC(obj))) # low stochastic, %K, %D and lowD
+        for (n in name){
+            nn <- paste(n,'.L',sep='')
+            obj <- getSymbols(nn,src=src,env=NULL)
+            obj <- na.omit(obj)
+            obj <- updQuote(obj,n,google=TRUE)
+            st <- last(stoch(HLC(obj))) # low stochastic, %K, %D and lowD
                                         #print(getQuote(n))
         if (n %in% shortlst){
             no <- which(shortlst == n)
-            if (!google){
-                cls <- q[[2]]
-                tm <- q[[1]]
-            }
-            else{
-                cls <- as.numeric(gQuote(n)$l)
-                tm <- 'real-time'
-                }
+            cls <- gQuote2(nn)
             balance <- stocks[no]/100*cls-tax[no]-stocks[no]/100*long[no]
-            msg1 <- paste(n,format(Sys.time(),'%H:%M'),'Bal=',signif(balance,3),'Last=',cls,'(',gQuote(n)$cp,'%) Limit=',lim[no],'(',tm,')')
+            msg1 <- paste(n,format(Sys.time(),'%H:%M'),'Bal=',signif(balance,3),'Last=',cls,'Limit=',lim[no])
             if (cls<=lim[no]) msg1 <- paste('!',msg1)
-            #if (google) msg <- paste(n,gQuote(n),'SSTO fastD=',signif(st$fastD,3),'slowD=',signif(st$slowD,3))
             if (telegram) bot$sendMessage(msg1)
-            if (google) print(msg1)
-            else print(msg1)
+            print(msg1)
         }
         if (chart){
             chartSeries(obj,subset=subset,TA=c(addSMA(),addEMA(30),addBBands(),addMACD(),addVo()),multi.col=FALSE,name=n,log.scale=T)
-            plot(addLines(h=lim[no],col='red'))
+            if (n %in% shortlst)
+                plot(addLines(h=lim[no],col='red'))
             plot(addSSTO())
             }
         Sys.sleep(60/length(name)*min)
@@ -221,41 +255,19 @@ stat <- function(data='~/Desktop/b886ck92.csv',series='S',subset='last 6 months'
     else if (series=='m') barplot(monthlyReturn(ck))
 }
 ##############################################################################
-dayTicker <- function(n='FXPO',min=5,imitate=FALSE,google=FALSE){
-    f <- data.frame()
+dayTicker <- function(names='FXPO',min=5,period='2d'){
     while (TRUE){
-        for (t in 1:min){
-            if (google){
-                j <- gQuote(paste('LON:',n,sep=''))
-                #dt <- strptime(j$lt,"%b %d, %I:%M%p")
-                dt <- Sys.time()
-                val <- as.numeric(j$l)
-                        }
-            else {
-                j <- getQuote(n)
-                dt <- j$Trade
-                val <- j$Last
-                  }
-            if (imitate){
-                dt <- Sys.time()
-                val <- runif(1,200,400)
-                }
-            if (t==1) {
-                price <- data.frame(dt,val,val,val,val)
-                names(price) <- c('Date','Open','High','Low','Close')
-                        }
-            else if (t==min) price$Close <- val
-            if (val>price$High) price$High <- val
-            if (val<price$Low) price$Low <- val
-            if (imitate) Sys.sleep(1)
-            else Sys.sleep(60)
+        for (name in names){
+            n <- paste(name,'.L',sep='')
+            ser <- gData(n=n,period=period,i=min*60)
+            chartSeries(ser,TA=c(addSMA(),addEMA(30),addMACD(),addSSTO()),name=name)
+            if (name %in% shortlst){
+                no <- which(shortlst == name)
+                plot(addLines(h=lim[no],col='red'))
             }
-        f <- rbind(f,price)
-        x <- xts(f[2:5],f$Date)
-        print(nrow(x))
-        if (nrow(x)>2 && nrow(x)<=10) chartSeries(x)
-        else if (nrow(x)>10 && nrow(x)<=30) chartSeries(x,TA=c(addSMA()))
-        else if (nrow(x)>30) chartSeries(x,TA=c(addSMA(),addEMA(30),addSSTO()))
+            plot(addLines(v=grep("16:30",index(ser)),col='green'))
+            Sys.sleep(60/length(names)*min)
+    }
+    }
     }
 ##############################################################################
-}
