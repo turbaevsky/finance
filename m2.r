@@ -69,7 +69,7 @@ gQuote <- function(n='LON:FXPO'){ # get quotes from google (real-time)
 
 
 gQuote2 <- function(n='FXPO.L'){
-    url <- paste('https://finance.google.com/finance/getprices?q=',n,'&p=3m&f=c&i=60',sep='')
+    url <- paste('https://finance.google.com/finance/getprices?q=',n,'&p=10m&f=c&i=60',sep='')
     d <- tail(read.table(url,sep=',',header=F,skip=7),1)[[1]]
     return(d)
     }
@@ -260,12 +260,13 @@ dayTicker <- function(names='FXPO',min=5,period='2d'){
         for (name in names){
             n <- paste(name,'.L',sep='')
             ser <- gData(n=n,period=period,i=min*60)
-            chartSeries(ser,TA=c(addSMA(),addEMA(30),addMACD(),addSSTO()),name=name)
+            chartSeries(ser,TA=c(addSMA(),addEMA(30),addVo(),addMACD(),addSSTO()),name=name)
             if (name %in% shortlst){
                 no <- which(shortlst == name)
                 plot(addLines(h=lim[no],col='red'))
             }
             plot(addLines(v=grep("16:30",index(ser)),col='green'))
+            print(paste(Sys.time(),n))
             Sys.sleep(60/length(names)*min)
     }
     }
